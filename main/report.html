@@ -55,7 +55,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/linkdata/dnstest/server.go (97.1%)</option>
+				<option value="file0">github.com/linkdata/dnstest/server.go (97.0%)</option>
 				
 				</select>
 			</div>
@@ -152,17 +152,17 @@ func (s *Server) handle(w dns.ResponseWriter, req *dns.Msg) <span class="cov8" t
                                 }</span>
                                 <span class="cov8" title="1">if resp.Raw != nil </span><span class="cov8" title="1">{
                                         _, _ = w.Write(resp.Raw)
-                                        return
-                                }</span>
-                                <span class="cov8" title="1">m := new(dns.Msg)
-                                if resp.Msg != nil </span><span class="cov8" title="1">{
-                                        resp.Msg.CopyTo(m)
-                                }</span>
-                                <span class="cov8" title="1">m.SetReply(req)
-                                if resp.Rcode != dns.RcodeSuccess </span><span class="cov8" title="1">{
-                                        m.Rcode = resp.Rcode
-                                }</span>
-                                <span class="cov8" title="1">_ = w.WriteMsg(m)</span>
+                                }</span> else<span class="cov8" title="1"> {
+                                        m := new(dns.Msg)
+                                        if resp.Msg != nil </span><span class="cov8" title="1">{
+                                                resp.Msg.CopyTo(m)
+                                        }</span>
+                                        <span class="cov8" title="1">m.SetReply(req)
+                                        if resp.Rcode != dns.RcodeSuccess </span><span class="cov8" title="1">{
+                                                m.Rcode = resp.Rcode
+                                        }</span>
+                                        <span class="cov8" title="1">_ = w.WriteMsg(m)</span>
+                                }
                         }
                 }
         }
