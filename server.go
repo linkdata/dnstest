@@ -99,5 +99,5 @@ func (s *Server) handle(w dns.ResponseWriter, req *dns.Msg) {
 
 // Key returns a map key for the given question name and type.
 func Key(name string, qtype uint16) string {
-	return dns.CanonicalName(name) + "/" + dns.TypeToString[qtype]
+	return dns.CanonicalName(name) + "/" + dns.Type(qtype).String()
 }
