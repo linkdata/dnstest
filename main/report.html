@@ -55,7 +55,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/linkdata/dnstest/server.go (97.4%)</option>
+				<option value="file0">github.com/linkdata/dnstest/server.go (97.1%)</option>
 				
 				</select>
 			</div>
@@ -154,18 +154,12 @@ func (s *Server) handle(w dns.ResponseWriter, req *dns.Msg) <span class="cov8" t
                                         _, _ = w.Write(resp.Raw)
                                         return
                                 }</span>
-                                <span class="cov8" title="1">var m *dns.Msg
+                                <span class="cov8" title="1">m := new(dns.Msg)
                                 if resp.Msg != nil </span><span class="cov8" title="1">{
-                                        m = resp.Msg.Copy()
-                                        // Preserve resource records from the original message after SetReply.
-                                        ans, ns, extra := m.Answer, m.Ns, m.Extra
-                                        m.SetReply(req)
-                                        m.Answer, m.Ns, m.Extra = ans, ns, extra
-                                }</span> else<span class="cov8" title="1"> {
-                                        m = new(dns.Msg)
-                                        m.SetReply(req)
+                                        resp.Msg.CopyTo(m)
                                 }</span>
-                                <span class="cov8" title="1">if resp.Rcode != 0 </span><span class="cov8" title="1">{
+                                <span class="cov8" title="1">m.SetReply(req)
+                                if resp.Rcode != dns.RcodeSuccess </span><span class="cov8" title="1">{
                                         m.Rcode = resp.Rcode
                                 }</span>
                                 <span class="cov8" title="1">_ = w.WriteMsg(m)</span>
