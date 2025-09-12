@@ -19,6 +19,7 @@ func TestServer(t *testing.T) {
 		Key("example.org.", dns.TypeA):      {Msg: respMsg},
 		Key("nxdomain.example.", dns.TypeA): {Rcode: dns.RcodeNameError},
 		Key("bad.example.", dns.TypeA):      {Raw: []byte{0, 1, 2, 3}},
+		Key("delay.example.", dns.TypeA):    {Delay: 10 * time.Millisecond},
 		Key("timeout.example.", dns.TypeA):  {Drop: true},
 	})
 	if err != nil {
@@ -60,6 +61,16 @@ func TestServer(t *testing.T) {
 	_, _, err = c.Exchange(req, srv.Addr)
 	if err == nil {
 		t.Fatalf("expected error for bad response")
+	}
+
+	req.SetQuestion("delay.example.", dns.TypeA)
+	now := time.Now()
+	_, _, err = c.Exchange(req, srv.Addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if elapsed := time.Since(now); elapsed < time.Millisecond*10 {
+		t.Error(elapsed)
 	}
 
 	c.ReadTimeout = time.Millisecond
