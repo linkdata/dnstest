@@ -134,8 +134,8 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) {
 		switch section {
 		case "question":
 			// Format usually: ";example.com.            IN      A"
-			if strings.HasPrefix(line, ";") {
-				s := strings.TrimSpace(strings.TrimPrefix(line, ";"))
+			if after, ok := strings.CutPrefix(line, ";"); ok {
+				s := strings.TrimSpace(after)
 				parts := fieldsClean(s)
 				// Some dig builds can omit class and show just name + type in QUESTION.
 				// We try [name class type] then [name type].
