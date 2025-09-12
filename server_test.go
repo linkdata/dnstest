@@ -14,6 +14,7 @@ func TestServer(t *testing.T) {
 		t.Fatalf("NewRR: %v", err)
 	}
 	respMsg := &dns.Msg{Answer: []dns.RR{rr}}
+	respMsg.Authoritative = true
 
 	srv, err := NewServer("127.0.0.1:0", map[string]*Response{
 		Key("example.org.", dns.TypeA):      {Msg: respMsg},
@@ -37,6 +38,9 @@ func TestServer(t *testing.T) {
 	if len(in.Answer) != 1 {
 		t.Fatalf("expected 1 answer, got %d", len(in.Answer))
 	}
+	if !in.Authoritative {
+		t.Fatal("expected AUTH answer")
+	}
 
 	c.Net = "tcp"
 	in, _, err = c.Exchange(req, srv.Addr)
@@ -55,6 +59,9 @@ func TestServer(t *testing.T) {
 	}
 	if in.Rcode != dns.RcodeNameError {
 		t.Fatalf("expected NXDOMAIN, got %d", in.Rcode)
+	}
+	if in.Authoritative {
+		t.Fatal("unexpected AUTH answer")
 	}
 
 	req.SetQuestion("bad.example.", dns.TypeA)

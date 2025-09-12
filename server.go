@@ -83,18 +83,12 @@ func (s *Server) handle(w dns.ResponseWriter, req *dns.Msg) {
 					_, _ = w.Write(resp.Raw)
 					return
 				}
-				var m *dns.Msg
+				m := new(dns.Msg)
 				if resp.Msg != nil {
-					m = resp.Msg.Copy()
-					// Preserve resource records from the original message after SetReply.
-					ans, ns, extra := m.Answer, m.Ns, m.Extra
-					m.SetReply(req)
-					m.Answer, m.Ns, m.Extra = ans, ns, extra
-				} else {
-					m = new(dns.Msg)
-					m.SetReply(req)
+					resp.Msg.CopyTo(m)
 				}
-				if resp.Rcode != 0 {
+				m.SetReply(req)
+				if resp.Rcode != dns.RcodeSuccess {
 					m.Rcode = resp.Rcode
 				}
 				_ = w.WriteMsg(m)
