@@ -59,7 +59,7 @@
 				
 				<option value="file1">github.com/linkdata/dnstest/network.go (0.0%)</option>
 				
-				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (79.9%)</option>
+				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (80.0%)</option>
 				
 				<option value="file3">github.com/linkdata/dnstest/server.go (97.6%)</option>
 				
@@ -205,14 +205,16 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) <span class="cov8" ti
                 }
 
                 // HEADER line (id/opcode/status)
-                <span class="cov8" title="1">if strings.HasPrefix(line, ";; -&gt;&gt;HEADER&lt;&lt;-") || (!seenHeaderLine &amp;&amp; strings.HasPrefix(line, ";; opcode:")) </span><span class="cov8" title="1">{
-                        seenHeaderLine = true
-                        if m := headerRe.FindStringSubmatch(line); m != nil </span><span class="cov8" title="1">{
-                                msg.Id = parseUint16(m[3])
-                                msg.Opcode = opcodeFromString(m[1])
-                                msg.Rcode = rcodeFromString(m[2])
-                        }</span>
-                        <span class="cov8" title="1">continue</span>
+                <span class="cov8" title="1">if !seenHeaderLine </span><span class="cov8" title="1">{
+                        if strings.HasPrefix(line, ";; -&gt;&gt;HEADER&lt;&lt;-") || strings.HasPrefix(line, ";; opcode:") </span><span class="cov8" title="1">{
+                                seenHeaderLine = true
+                                if m := headerRe.FindStringSubmatch(line); m != nil </span><span class="cov8" title="1">{
+                                        msg.Id = parseUint16(m[3])
+                                        msg.Opcode = opcodeFromString(m[1])
+                                        msg.Rcode = rcodeFromString(m[2])
+                                }</span>
+                                <span class="cov8" title="1">continue</span>
+                        }
                 }
 
                 // FLAGS / COUNTS (may be same line as HEADER or the next one)
