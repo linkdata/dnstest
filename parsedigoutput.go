@@ -67,7 +67,7 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) {
 		if strings.Contains(line, ";; ->>HEADER<<-") {
 			seenHeaderLine = true
 			if m := headerRe.FindStringSubmatch(line); m != nil {
-				msg.Id = uint16(atoiSafe(m[3]))
+				msg.Id = parseUint16(m[3])
 				msg.Opcode = opcodeFromString(m[1])
 				msg.Rcode = rcodeFromString(m[2])
 			}
@@ -154,7 +154,7 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) {
 			l := strings.TrimPrefix(line, ";")
 			l = strings.TrimSpace(l)
 			if m := ednsRe.FindStringSubmatch(l); m != nil {
-				udpSize := uint16(atoiSafe(m[3]))
+				udpSize := parseUint16(m[3])
 				do := strings.Contains(strings.ToLower(m[2]), "do")
 				opt := msg.IsEdns0()
 				if opt == nil {
@@ -230,9 +230,9 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) {
 
 // --- helpers ---
 
-func atoiSafe(s string) int {
-	n, _ := strconv.Atoi(strings.TrimSpace(s))
-	return n
+func parseUint16(s string) uint16 {
+	n, _ := strconv.ParseUint(strings.TrimSpace(s), 10, 16)
+	return uint16(n)
 }
 
 func fieldsClean(s string) []string {
