@@ -1,0 +1,55 @@
+name: Build
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        go:
+          - "stable"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+
+      - name: Go generate
+        run: go generate ./...
+
+      - name: Test
+        run: go test -tags debug -bench=. -coverprofile=coverage.out .
+
+      - name: Run Gosec Security Scanner
+        uses: securego/gosec@master
+        with:
+          args: ./...
+
+      - name: Build
+        run: go build .
+
+      - name: Go report card
+        uses: creekorful/goreportcard-action@v1.0
+
+      - name: Calculate code coverage
+        id: coverage
+        run: |
+          echo "COVERAGE=$(go tool cover -func=coverage.out | tail -n 1 | tr -s '\t' | cut -f 3)" >> $GITHUB_OUTPUT
+          go tool cover -html=coverage.out -o=coveragereport.html.out
+
+      - name: Publish code coverage badge (and optional report)
+        uses: linkdata/gitcoverage@v1
+        with:
+          coverage: ${{ steps.coverage.outputs.coverage }}
+          report:   "coveragereport.html.out"
