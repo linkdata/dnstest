@@ -1,6 +1,7 @@
 package dnstest
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -35,11 +36,13 @@ func TestServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("udp exchange: %v", err)
 	}
-	if len(in.Answer) != 1 {
-		t.Fatalf("expected 1 answer, got %d", len(in.Answer))
-	}
 	if !in.Authoritative {
 		t.Fatal("expected AUTH answer")
+	}
+	want := fmt.Sprint(respMsg.Answer)
+	got := fmt.Sprint(in.Answer)
+	if want != got {
+		t.Fatalf("\nwant %q\n got %q\n", want, got)
 	}
 
 	c.Net = "tcp"
@@ -47,8 +50,9 @@ func TestServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("tcp exchange: %v", err)
 	}
-	if len(in.Answer) != 1 {
-		t.Fatalf("expected 1 tcp answer, got %d", len(in.Answer))
+	got = fmt.Sprint(in.Answer)
+	if want != got {
+		t.Fatalf("\nwant %q\n got %q\n", want, got)
 	}
 
 	c.Net = "udp"
