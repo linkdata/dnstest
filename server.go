@@ -75,10 +75,10 @@ func (s *Server) Close() {
 func (s *Server) handle(w dns.ResponseWriter, req *dns.Msg) {
 	for _, q := range req.Question {
 		if resp, ok := s.responses[Key(q.Name, q.Qtype)]; ok {
-			if resp.Delay > 0 {
-				time.Sleep(resp.Delay)
-			}
 			if !resp.Drop {
+				if resp.Delay > 0 {
+					time.Sleep(resp.Delay)
+				}
 				if resp.Raw != nil {
 					_, _ = w.Write(resp.Raw)
 					return
