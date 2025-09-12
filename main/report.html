@@ -55,7 +55,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/linkdata/dnstest/server.go (78.4%)</option>
+				<option value="file0">github.com/linkdata/dnstest/server.go (97.4%)</option>
 				
 				</select>
 			</div>
@@ -74,8 +74,6 @@ package dnstest
 
 import (
         "net"
-        "strconv"
-        "strings"
         "time"
 
         "github.com/miekg/dns"
@@ -111,33 +109,28 @@ type Server struct {
 // NewServer starts a new DNS server on addr serving the provided responses.
 // The same address and port are used for both UDP and TCP. If the port in addr
 // is "0" an available port will be chosen automatically.
-func NewServer(addr string, responses map[string]*Response) (*Server, error) <span class="cov8" title="1">{
-        udpAddr, err := net.ResolveUDPAddr("udp", addr)
-        if err != nil </span><span class="cov0" title="0">{
-                return nil, err
-        }</span>
-        <span class="cov8" title="1">udpConn, err := net.ListenUDP("udp", udpAddr)
-        if err != nil </span><span class="cov0" title="0">{
-                return nil, err
-        }</span>
-        <span class="cov8" title="1">tcpListener, err := net.Listen("tcp", udpConn.LocalAddr().String())
-        if err != nil </span><span class="cov0" title="0">{
-                _ = udpConn.Close()
-                return nil, err
-        }</span>
-
-        <span class="cov8" title="1">s := &amp;Server{
-                Addr:      udpConn.LocalAddr().String(),
-                responses: responses,
+func NewServer(addr string, responses map[string]*Response) (s *Server, err error) <span class="cov8" title="1">{
+        var udpAddr *net.UDPAddr
+        if udpAddr, err = net.ResolveUDPAddr("udp", addr); err == nil </span><span class="cov8" title="1">{
+                var udpConn *net.UDPConn
+                if udpConn, err = net.ListenUDP("udp", udpAddr); err == nil </span><span class="cov8" title="1">{
+                        var tcpListener net.Listener
+                        if tcpListener, err = net.Listen("tcp", udpConn.LocalAddr().String()); err == nil </span><span class="cov8" title="1">{
+                                s = &amp;Server{
+                                        Addr:      udpConn.LocalAddr().String(),
+                                        responses: responses,
+                                }
+                                handler := dns.HandlerFunc(s.handle)
+                                s.udp = &amp;dns.Server{PacketConn: udpConn, Handler: handler}
+                                s.tcp = &amp;dns.Server{Listener: tcpListener, Handler: handler}
+                                go s.udp.ActivateAndServe()
+                                go s.tcp.ActivateAndServe()
+                        }</span> else<span class="cov0" title="0"> {
+                                _ = udpConn.Close()
+                        }</span>
+                }
         }
-        handler := dns.HandlerFunc(s.handle)
-        s.udp = &amp;dns.Server{PacketConn: udpConn, Handler: handler}
-        s.tcp = &amp;dns.Server{Listener: tcpListener, Handler: handler}
-
-        go s.udp.ActivateAndServe()
-        go s.tcp.ActivateAndServe()
-
-        return s, nil</span>
+        <span class="cov8" title="1">return</span>
 }
 
 // Close shuts down the server.
@@ -151,50 +144,39 @@ func (s *Server) Close() <span class="cov8" title="1">{
 }
 
 func (s *Server) handle(w dns.ResponseWriter, req *dns.Msg) <span class="cov8" title="1">{
-        if len(req.Question) == 0 </span><span class="cov0" title="0">{
-                _ = w.Close()
-                return
-        }</span>
-        <span class="cov8" title="1">q := req.Question[0]
-        key := Key(q.Name, q.Qtype)
-        resp, ok := s.responses[key]
-        if !ok </span><span class="cov0" title="0">{
-                m := new(dns.Msg)
-                m.SetRcode(req, dns.RcodeNameError)
-                _ = w.WriteMsg(m)
-                return
-        }</span>
-
-        <span class="cov8" title="1">if resp.Delay &gt; 0 </span><span class="cov0" title="0">{
-                time.Sleep(resp.Delay)
-        }</span>
-        <span class="cov8" title="1">if resp.Drop </span><span class="cov8" title="1">{
-                return
-        }</span>
-        <span class="cov8" title="1">if resp.Raw != nil </span><span class="cov8" title="1">{
-                _, _ = w.Write(resp.Raw)
-                return
-        }</span>
-        <span class="cov8" title="1">var m *dns.Msg
-        if resp.Msg != nil </span><span class="cov8" title="1">{
-                m = resp.Msg.Copy()
-                // Preserve resource records from the original message after SetReply.
-                ans, ns, extra := m.Answer, m.Ns, m.Extra
-                m.SetReply(req)
-                m.Answer, m.Ns, m.Extra = ans, ns, extra
-        }</span> else<span class="cov8" title="1"> {
-                m = new(dns.Msg)
-                m.SetReply(req)
-        }</span>
-        <span class="cov8" title="1">if resp.Rcode != 0 </span><span class="cov8" title="1">{
-                m.Rcode = resp.Rcode
-        }</span>
-        <span class="cov8" title="1">_ = w.WriteMsg(m)</span>
+        for _, q := range req.Question </span><span class="cov8" title="1">{
+                if resp, ok := s.responses[Key(q.Name, q.Qtype)]; ok </span><span class="cov8" title="1">{
+                        if resp.Delay &gt; 0 </span><span class="cov8" title="1">{
+                                time.Sleep(resp.Delay)
+                        }</span>
+                        <span class="cov8" title="1">if !resp.Drop </span><span class="cov8" title="1">{
+                                if resp.Raw != nil </span><span class="cov8" title="1">{
+                                        _, _ = w.Write(resp.Raw)
+                                        return
+                                }</span>
+                                <span class="cov8" title="1">var m *dns.Msg
+                                if resp.Msg != nil </span><span class="cov8" title="1">{
+                                        m = resp.Msg.Copy()
+                                        // Preserve resource records from the original message after SetReply.
+                                        ans, ns, extra := m.Answer, m.Ns, m.Extra
+                                        m.SetReply(req)
+                                        m.Answer, m.Ns, m.Extra = ans, ns, extra
+                                }</span> else<span class="cov8" title="1"> {
+                                        m = new(dns.Msg)
+                                        m.SetReply(req)
+                                }</span>
+                                <span class="cov8" title="1">if resp.Rcode != 0 </span><span class="cov8" title="1">{
+                                        m.Rcode = resp.Rcode
+                                }</span>
+                                <span class="cov8" title="1">_ = w.WriteMsg(m)</span>
+                        }
+                }
+        }
 }
 
 // Key returns a map key for the given question name and type.
 func Key(name string, qtype uint16) string <span class="cov8" title="1">{
-        return strings.ToLower(name) + "/" + strconv.FormatUint(uint64(qtype), 10)
+        return dns.CanonicalName(name) + "/" + dns.TypeToString[qtype]
 }</span>
 </pre>
 		
