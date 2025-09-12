@@ -81,17 +81,17 @@ func (s *Server) handle(w dns.ResponseWriter, req *dns.Msg) {
 				}
 				if resp.Raw != nil {
 					_, _ = w.Write(resp.Raw)
-					return
+				} else {
+					m := new(dns.Msg)
+					if resp.Msg != nil {
+						resp.Msg.CopyTo(m)
+					}
+					m.SetReply(req)
+					if resp.Rcode != dns.RcodeSuccess {
+						m.Rcode = resp.Rcode
+					}
+					_ = w.WriteMsg(m)
 				}
-				m := new(dns.Msg)
-				if resp.Msg != nil {
-					resp.Msg.CopyTo(m)
-				}
-				m.SetReply(req)
-				if resp.Rcode != dns.RcodeSuccess {
-					m.Rcode = resp.Rcode
-				}
-				_ = w.WriteMsg(m)
 			}
 		}
 	}
