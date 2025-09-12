@@ -75,7 +75,7 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) {
 		}
 
 		// FLAGS / COUNTS (may be same line as HEADER or the next one)
-		if strings.HasPrefix(line, ";; flags:") || (seenHeaderLine && strings.Contains(line, "flags:")) {
+		if strings.HasPrefix(line, ";; flags:") || (seenHeaderLine && strings.HasPrefix(line, "flags:")) {
 			if m := flagsRe.FindStringSubmatch(line); m != nil {
 				setFlags(&msg, m[1])
 			}
@@ -114,7 +114,7 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) {
 		// Stop lines we just ignore
 		if strings.HasPrefix(line, ";; Query time:") ||
 			strings.HasPrefix(line, ";; WHEN:") ||
-			strings.HasPrefix(line, ";; MSG SIZE rcvd:") {
+			strings.HasPrefix(line, ";; MSG SIZE") {
 			continue
 		}
 
@@ -158,7 +158,12 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) {
 				do := strings.Contains(strings.ToLower(m[2]), "do")
 				opt := msg.IsEdns0()
 				if opt == nil {
-					msg.SetEdns0(udpSize, do)
+					opt = &dns.OPT{}
+					opt.Hdr.Name = "."
+					opt.Hdr.Rrtype = dns.TypeOPT
+					opt.SetUDPSize(udpSize)
+					opt.SetDo(do)
+					msg.Extra = append(msg.Extra, opt)
 				} else {
 					// Update existing
 					opt.SetUDPSize(udpSize)
@@ -187,7 +192,9 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) {
 			if err != nil {
 				return nil, srvaddr, fmt.Errorf("parse RR in %s: %q: %w", section, rrLine, err)
 			}
-
+			if rr == nil {
+				continue
+			}
 			switch section {
 			case "answer":
 				msg.Answer = append(msg.Answer, rr)
