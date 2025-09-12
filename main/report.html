@@ -1,0 +1,230 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>dnstest: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/linkdata/dnstest/server.go (78.4%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">// Package dnstest provides a configurable DNS server simulator for tests.
+package dnstest
+
+import (
+        "net"
+        "strconv"
+        "strings"
+        "time"
+
+        "github.com/miekg/dns"
+)
+
+// Response defines how the server should answer a specific DNS question.
+type Response struct {
+        // Msg is sent as the response if non-nil. The Question and Id are set from
+        // the incoming request before sending.
+        Msg *dns.Msg
+        // Rcode is used if Msg is nil to set the reply code in the generated
+        // message. Defaults to RcodeSuccess.
+        Rcode int
+        // Raw is written directly on the wire instead of Msg/Rcode allowing
+        // responses with malformed DNS packets.
+        Raw []byte
+        // Drop causes the server to ignore the request simulating a timeout.
+        Drop bool
+        // Delay adds an optional delay before processing the response.
+        Delay time.Duration
+}
+
+// Server simulates a DNS server for use in tests.
+type Server struct {
+        // Addr is the address the server is listening on.
+        Addr string
+
+        responses map[string]*Response
+        udp       *dns.Server
+        tcp       *dns.Server
+}
+
+// NewServer starts a new DNS server on addr serving the provided responses.
+// The same address and port are used for both UDP and TCP. If the port in addr
+// is "0" an available port will be chosen automatically.
+func NewServer(addr string, responses map[string]*Response) (*Server, error) <span class="cov8" title="1">{
+        udpAddr, err := net.ResolveUDPAddr("udp", addr)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">udpConn, err := net.ListenUDP("udp", udpAddr)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">tcpListener, err := net.Listen("tcp", udpConn.LocalAddr().String())
+        if err != nil </span><span class="cov0" title="0">{
+                _ = udpConn.Close()
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">s := &amp;Server{
+                Addr:      udpConn.LocalAddr().String(),
+                responses: responses,
+        }
+        handler := dns.HandlerFunc(s.handle)
+        s.udp = &amp;dns.Server{PacketConn: udpConn, Handler: handler}
+        s.tcp = &amp;dns.Server{Listener: tcpListener, Handler: handler}
+
+        go s.udp.ActivateAndServe()
+        go s.tcp.ActivateAndServe()
+
+        return s, nil</span>
+}
+
+// Close shuts down the server.
+func (s *Server) Close() <span class="cov8" title="1">{
+        if s.udp != nil </span><span class="cov8" title="1">{
+                _ = s.udp.Shutdown()
+        }</span>
+        <span class="cov8" title="1">if s.tcp != nil </span><span class="cov8" title="1">{
+                _ = s.tcp.Shutdown()
+        }</span>
+}
+
+func (s *Server) handle(w dns.ResponseWriter, req *dns.Msg) <span class="cov8" title="1">{
+        if len(req.Question) == 0 </span><span class="cov0" title="0">{
+                _ = w.Close()
+                return
+        }</span>
+        <span class="cov8" title="1">q := req.Question[0]
+        key := Key(q.Name, q.Qtype)
+        resp, ok := s.responses[key]
+        if !ok </span><span class="cov0" title="0">{
+                m := new(dns.Msg)
+                m.SetRcode(req, dns.RcodeNameError)
+                _ = w.WriteMsg(m)
+                return
+        }</span>
+
+        <span class="cov8" title="1">if resp.Delay &gt; 0 </span><span class="cov0" title="0">{
+                time.Sleep(resp.Delay)
+        }</span>
+        <span class="cov8" title="1">if resp.Drop </span><span class="cov8" title="1">{
+                return
+        }</span>
+        <span class="cov8" title="1">if resp.Raw != nil </span><span class="cov8" title="1">{
+                _, _ = w.Write(resp.Raw)
+                return
+        }</span>
+        <span class="cov8" title="1">var m *dns.Msg
+        if resp.Msg != nil </span><span class="cov8" title="1">{
+                m = resp.Msg.Copy()
+                // Preserve resource records from the original message after SetReply.
+                ans, ns, extra := m.Answer, m.Ns, m.Extra
+                m.SetReply(req)
+                m.Answer, m.Ns, m.Extra = ans, ns, extra
+        }</span> else<span class="cov8" title="1"> {
+                m = new(dns.Msg)
+                m.SetReply(req)
+        }</span>
+        <span class="cov8" title="1">if resp.Rcode != 0 </span><span class="cov8" title="1">{
+                m.Rcode = resp.Rcode
+        }</span>
+        <span class="cov8" title="1">_ = w.WriteMsg(m)</span>
+}
+
+// Key returns a map key for the given question name and type.
+func Key(name string, qtype uint16) string <span class="cov8" title="1">{
+        return strings.ToLower(name) + "/" + strconv.FormatUint(uint64(qtype), 10)
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
