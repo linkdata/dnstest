@@ -55,7 +55,13 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/linkdata/dnstest/server.go (97.0%)</option>
+				<option value="file0">github.com/linkdata/dnstest/key.go (100.0%)</option>
+				
+				<option value="file1">github.com/linkdata/dnstest/network.go (0.0%)</option>
+				
+				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (77.0%)</option>
+				
+				<option value="file3">github.com/linkdata/dnstest/server.go (97.6%)</option>
 				
 				</select>
 			</div>
@@ -69,11 +75,405 @@
 		</div>
 		<div id="content">
 		
-		<pre class="file" id="file0" style="display: none">// Package dnstest provides a configurable DNS server simulator for tests.
+		<pre class="file" id="file0" style="display: none">package dnstest
+
+import "github.com/miekg/dns"
+
+type Key struct {
+        Qname string // DNS query canonical name
+        Qtype uint16 // DNS query type
+}
+
+// NewKey returns a map key for the given question name and type.
+func NewKey(qname string, qtype uint16) Key <span class="cov8" title="1">{
+        return Key{
+                Qname: dns.CanonicalName(qname),
+                Qtype: qtype,
+        }
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package dnstest
+
+import (
+        "github.com/miekg/dns"
+)
+
+type Network struct {
+}
+
+func NewNetwork(msgs []*dns.Msg) (nw *Network, err error) <span class="cov0" title="0">{
+        aSet := map[string]map[string]struct{}{} // A record qname -&gt; set of IPs
+        nsSet := map[string]struct{}{}           // NS records
+        for _, msg := range msgs </span><span class="cov0" title="0">{
+                if msg != nil </span><span class="cov0" title="0">{
+                        for _, rrs := range [][]dns.RR{msg.Answer, msg.Ns, msg.Answer} </span><span class="cov0" title="0">{
+                                for _, rr := range rrs </span><span class="cov0" title="0">{
+                                        qname := dns.CanonicalName(rr.Header().Name)
+                                        switch rr := rr.(type) </span>{
+                                        case *dns.A:<span class="cov0" title="0">
+                                                aSet[qname][rr.A.String()] = struct{}{}</span>
+                                        case *dns.AAAA:<span class="cov0" title="0">
+                                                aSet[qname][rr.AAAA.String()] = struct{}{}</span>
+                                        case *dns.NS:<span class="cov0" title="0">
+                                                nsSet[dns.CanonicalName(rr.Ns)] = struct{}{}</span>
+                                        }
+                                }
+                        }
+                }
+        }
+
+        <span class="cov0" title="0">return</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package dnstest
+
+import (
+        "bufio"
+        "fmt"
+        "io"
+        "regexp"
+        "strconv"
+        "strings"
+
+        "github.com/miekg/dns"
+)
+
+var (
+        headerRe = regexp.MustCompile(`opcode:\s*([A-Z]+),\s*status:\s*([A-Z0-9_-]+),\s*id:\s*(\d+)`)
+        flagsRe  = regexp.MustCompile(`flags:\s*([a-z ]+);`)
+        countsRe = regexp.MustCompile(`QUERY:\s*(\d+),\s*ANSWER:\s*(\d+),\s*AUTHORITY:\s*(\d+),\s*ADDITIONAL:\s*(\d+)`)
+        serverRe = regexp.MustCompile(`^;;\s*SERVER:\s*([^\s#(;]+)(?:#(\d+))?`)
+        // Examples we try to support:
+        //   "EDNS: version 0; flags: do; udp: 1232"
+        //   "EDNS: version: 0, flags:; udp: 4096"
+        ednsRe = regexp.MustCompile(`EDNS:\s*version:?[\s]*([0-9]+)[,;]?\s*flags:\s*([a-z ]*);?\s*udp:\s*([0-9]+)`)
+)
+
+// ParseDigOutput turns the stdout text of `dig` into a dns.Msg, the server that
+// was queried (as "host" or "host#port" if available), and an error.
+// It best-effort fills MsgHdr (id, opcode, rcode, flags), Question, Answer,
+// Authority, Additional, and EDNS (via OPT PSEUDOSECTION).
+//
+// If it reads a line starting with "; &lt;&lt;&gt;&gt; " and it has found data, it returns.
+// This allows reading consecutive messages from a single stream.
+func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) <span class="cov8" title="1">{
+        var (
+                msg            dns.Msg
+                srvaddr        string
+                section        = "" // "", "question", "answer", "authority", "additional", "opt"
+                rrBuf          []string
+                parenDepth     int
+                seenHeaderLine bool
+        )
+
+        sc := bufio.NewScanner(r)
+
+        for sc.Scan() </span><span class="cov8" title="1">{
+                line := strings.TrimSpace(sc.Text())
+                if line == "" </span><span class="cov8" title="1">{
+                        continue</span>
+                }
+
+                // DIG version line (separates entries)
+                <span class="cov8" title="1">if strings.HasPrefix(line, "; &lt;&lt;&gt;&gt; ") &amp;&amp; seenHeaderLine </span><span class="cov0" title="0">{
+                        break</span>
+                }
+
+                // SERVER line
+                <span class="cov8" title="1">if strings.HasPrefix(line, ";; SERVER:") </span><span class="cov8" title="1">{
+                        if m := serverRe.FindStringSubmatch(line); m != nil </span><span class="cov8" title="1">{
+                                srvaddr = m[1]
+                                if m[2] != "" </span><span class="cov8" title="1">{
+                                        srvaddr = srvaddr + "#" + m[2]
+                                }</span>
+                        }
+                        <span class="cov8" title="1">continue</span>
+                }
+
+                // HEADER line (id/opcode/status)
+                <span class="cov8" title="1">if strings.Contains(line, ";; -&gt;&gt;HEADER&lt;&lt;-") </span><span class="cov8" title="1">{
+                        seenHeaderLine = true
+                        if m := headerRe.FindStringSubmatch(line); m != nil </span><span class="cov8" title="1">{
+                                msg.Id = parseUint16(m[3])
+                                msg.Opcode = opcodeFromString(m[1])
+                                msg.Rcode = rcodeFromString(m[2])
+                        }</span>
+                        <span class="cov8" title="1">continue</span>
+                }
+
+                // FLAGS / COUNTS (may be same line as HEADER or the next one)
+                <span class="cov8" title="1">if strings.HasPrefix(line, ";; flags:") || (seenHeaderLine &amp;&amp; strings.HasPrefix(line, "flags:")) </span><span class="cov8" title="1">{
+                        if m := flagsRe.FindStringSubmatch(line); m != nil </span><span class="cov8" title="1">{
+                                setFlags(&amp;msg, m[1])
+                        }</span>
+                        // counts are not strictly required to be set in MsgHdr; dns.Msg
+                        // derives them from the slices on pack. We parse them only to avoid surprises.
+                        <span class="cov8" title="1">if m := countsRe.FindStringSubmatch(line); m != nil </span><span class="cov8" title="1">{
+                                // No-op; present for validation. We rely on slice lengths.
+                                _ = m
+                        }</span>
+                        <span class="cov8" title="1">continue</span>
+                }
+
+                // Section switches
+                <span class="cov8" title="1">switch </span>{
+                case strings.HasPrefix(line, ";; QUESTION SECTION:"):<span class="cov8" title="1">
+                        section = "question"
+                        continue</span>
+                case strings.HasPrefix(line, ";; ANSWER SECTION:"):<span class="cov8" title="1">
+                        section = "answer"
+                        continue</span>
+                case strings.HasPrefix(line, ";; AUTHORITY SECTION:"):<span class="cov8" title="1">
+                        section = "authority"
+                        continue</span>
+                case strings.HasPrefix(line, ";; ADDITIONAL SECTION:"):<span class="cov8" title="1">
+                        section = "additional"
+                        continue</span>
+                case strings.HasPrefix(line, ";; OPT PSEUDOSECTION:"):<span class="cov8" title="1">
+                        section = "opt"
+                        continue</span>
+                case strings.HasPrefix(line, ";; TSIG PSEUDOSECTION:"):<span class="cov0" title="0">
+                        // Not reconstructing TSIG (dig rarely shows it; wire details not present).
+                        section = "" // consume, but ignore TSIG contents safely
+                        continue</span>
+                }
+
+                // Stop lines we just ignore
+                <span class="cov8" title="1">if strings.HasPrefix(line, ";; Query time:") ||
+                        strings.HasPrefix(line, ";; WHEN:") ||
+                        strings.HasPrefix(line, ";; MSG SIZE") </span><span class="cov8" title="1">{
+                        continue</span>
+                }
+
+                // Parse the active section
+                <span class="cov8" title="1">switch section </span>{
+                case "question":<span class="cov8" title="1">
+                        // Format usually: ";example.com.            IN      A"
+                        if strings.HasPrefix(line, ";") </span><span class="cov8" title="1">{
+                                s := strings.TrimSpace(strings.TrimPrefix(line, ";"))
+                                parts := fieldsClean(s)
+                                // Some dig builds can omit class and show just name + type in QUESTION.
+                                // We try [name class type] then [name type].
+                                switch len(parts) </span>{
+                                case 2:<span class="cov8" title="1">
+                                        name := parts[0]
+                                        qtype := parts[1]
+                                        msg.Question = append(msg.Question, dns.Question{
+                                                Name:   dns.Fqdn(name),
+                                                Qtype:  typeFromString(qtype),
+                                                Qclass: dns.ClassINET,
+                                        })</span>
+                                default:<span class="cov8" title="1">
+                                        if len(parts) &gt;= 3 </span><span class="cov8" title="1">{
+                                                name, classStr, typeStr := parts[0], parts[1], parts[2]
+                                                msg.Question = append(msg.Question, dns.Question{
+                                                        Name:   dns.Fqdn(name),
+                                                        Qtype:  typeFromString(typeStr),
+                                                        Qclass: classFromString(classStr),
+                                                })
+                                        }</span>
+                                }
+                        }
+
+                case "opt":<span class="cov8" title="1">
+                        // The EDNS summary may be on the next line after the ";; OPT PSEUDOSECTION:" header.
+                        // Accept lines starting with ';' or raw.
+                        l := strings.TrimPrefix(line, ";")
+                        l = strings.TrimSpace(l)
+                        if m := ednsRe.FindStringSubmatch(l); m != nil </span><span class="cov8" title="1">{
+                                udpSize := parseUint16(m[3])
+                                do := strings.Contains(strings.ToLower(m[2]), "do")
+                                opt := msg.IsEdns0()
+                                if opt == nil </span><span class="cov8" title="1">{
+                                        opt = &amp;dns.OPT{}
+                                        opt.Hdr.Name = "."
+                                        opt.Hdr.Rrtype = dns.TypeOPT
+                                        opt.SetUDPSize(udpSize)
+                                        opt.SetDo(do)
+                                        msg.Extra = append(msg.Extra, opt)
+                                }</span> else<span class="cov0" title="0"> {
+                                        // Update existing
+                                        opt.SetUDPSize(udpSize)
+                                        opt.SetDo(do)
+                                }</span>
+                                // Version (m[1]) is typically 0; miekg/dns keeps it in opt.Hdr.Ttl bits.
+                                // dns.EDNS0_VERSION is encoded in TTL upper 8 bits; we leave default (0).
+                        }
+                        // If the line is not the EDNS summary (e.g., "; NSID: ..."), we ignore.
+
+                case "answer", "authority", "additional":<span class="cov8" title="1">
+                        // Collect RRs; handle multi-line with parentheses the same way dig prints folded records.
+                        parenDepth += strings.Count(line, "(") - strings.Count(line, ")")
+                        rrBuf = append(rrBuf, line)
+                        if parenDepth &gt; 0 </span><span class="cov8" title="1">{
+                                continue</span>
+                        }
+                        <span class="cov8" title="1">rrLine := normalizeRR(strings.Join(rrBuf, " "))
+                        rrBuf = rrBuf[:0]
+
+                        rr, err := dns.NewRR(rrLine)
+                        if err != nil </span><span class="cov0" title="0">{
+                                // Try a less-aggressive normalization before giving up
+                                rr, err = dns.NewRR(strings.Join(fieldsClean(rrLine), " "))
+                        }</span>
+                        <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
+                                return nil, srvaddr, fmt.Errorf("parse RR in %s: %q: %w", section, rrLine, err)
+                        }</span>
+                        <span class="cov8" title="1">if rr == nil </span><span class="cov0" title="0">{
+                                continue</span>
+                        }
+                        <span class="cov8" title="1">switch section </span>{
+                        case "answer":<span class="cov8" title="1">
+                                msg.Answer = append(msg.Answer, rr)</span>
+                        case "authority":<span class="cov8" title="1">
+                                msg.Ns = append(msg.Ns, rr)</span>
+                        case "additional":<span class="cov8" title="1">
+                                // Avoid duplicating OPT; dig often renders OPT in the pseudo-section,
+                                // but sometimes also shows other additionals (A/AAAA for NS target etc).
+                                if _, ok := rr.(*dns.OPT); ok </span><span class="cov0" title="0">{
+                                        // ensure it’s the EDNS we already set; skip duplicate
+                                        continue</span>
+                                }
+                                <span class="cov8" title="1">msg.Extra = append(msg.Extra, rr)</span>
+                        }
+                default:<span class="cov8" title="1"></span>
+                        // No active section; ignore noise
+                }
+        }
+
+        <span class="cov8" title="1">if err := sc.Err(); err != nil </span><span class="cov0" title="0">{
+                return nil, srvaddr, err
+        }</span>
+
+        // If we never saw a header but we have content, it's still a usable Msg.
+        // Ensure Response bit usually true for dig outputs.
+        <span class="cov8" title="1">if !msg.Response </span><span class="cov0" title="0">{
+                msg.Response = true
+        }</span>
+
+        // Sanity: must have at least one question to be a proper response, but we don't enforce.
+        <span class="cov8" title="1">return &amp;msg, srvaddr, nil</span>
+}
+
+// --- helpers ---
+
+func parseUint16(s string) uint16 <span class="cov8" title="1">{
+        n, _ := strconv.ParseUint(strings.TrimSpace(s), 10, 16)
+        return uint16(n)
+}</span>
+
+func fieldsClean(s string) []string <span class="cov8" title="1">{
+        fs := strings.Fields(s)
+        // Clean trailing semicolons that sometimes sneak in
+        for i := range fs </span><span class="cov8" title="1">{
+                fs[i] = strings.TrimSuffix(fs[i], ";")
+        }</span>
+        <span class="cov8" title="1">return fs</span>
+}
+
+func normalizeRR(s string) string <span class="cov8" title="1">{
+        // Collapse runs of whitespace, remove stray leading semicolons, trim.
+        s = strings.TrimSpace(s)
+        s = strings.TrimPrefix(s, ";")
+        // Replace tabs with spaces; keep quoted strings as-is (dns.NewRR can handle).
+        s = strings.Join(strings.Fields(s), " ")
+        return s
+}</span>
+
+func setFlags(msg *dns.Msg, flags string) <span class="cov8" title="1">{
+        fl := strings.Fields(strings.ToLower(flags))
+        for _, f := range fl </span><span class="cov8" title="1">{
+                switch f </span>{
+                case "qr":<span class="cov8" title="1">
+                        msg.Response = true</span>
+                case "aa":<span class="cov0" title="0">
+                        msg.Authoritative = true</span>
+                case "tc":<span class="cov0" title="0">
+                        msg.Truncated = true</span>
+                case "rd":<span class="cov8" title="1">
+                        msg.RecursionDesired = true</span>
+                case "ra":<span class="cov8" title="1">
+                        msg.RecursionAvailable = true</span>
+                case "ad":<span class="cov8" title="1">
+                        msg.AuthenticatedData = true</span>
+                case "cd":<span class="cov0" title="0">
+                        msg.CheckingDisabled = true</span>
+                }
+        }
+}
+
+func opcodeFromString(s string) int <span class="cov8" title="1">{
+        switch strings.ToUpper(strings.TrimSpace(s)) </span>{
+        case "QUERY":<span class="cov8" title="1">
+                return dns.OpcodeQuery</span>
+        case "IQUERY", "IQ":<span class="cov0" title="0">
+                return dns.OpcodeIQuery</span> // deprecated but map it if seen
+        case "STATUS":<span class="cov0" title="0">
+                return dns.OpcodeStatus</span>
+        case "NOTIFY":<span class="cov0" title="0">
+                return dns.OpcodeNotify</span>
+        case "UPDATE":<span class="cov0" title="0">
+                return dns.OpcodeUpdate</span>
+        default:<span class="cov0" title="0">
+                return dns.OpcodeQuery</span>
+        }
+}
+
+func rcodeFromString(s string) int <span class="cov8" title="1">{
+        switch strings.ToUpper(strings.TrimSpace(s)) </span>{
+        case "NOERROR", "SUCCESS":<span class="cov8" title="1">
+                return dns.RcodeSuccess</span>
+        case "FORMERR":<span class="cov0" title="0">
+                return dns.RcodeFormatError</span>
+        case "SERVFAIL":<span class="cov0" title="0">
+                return dns.RcodeServerFailure</span>
+        case "NXDOMAIN":<span class="cov8" title="1">
+                return dns.RcodeNameError</span>
+        case "NOTIMP":<span class="cov0" title="0">
+                return dns.RcodeNotImplemented</span>
+        case "REFUSED":<span class="cov0" title="0">
+                return dns.RcodeRefused</span>
+        case "YXDOMAIN":<span class="cov0" title="0">
+                return dns.RcodeYXDomain</span>
+        case "YXRRSET":<span class="cov0" title="0">
+                return dns.RcodeYXRrset</span>
+        case "NXRRSET":<span class="cov0" title="0">
+                return dns.RcodeNXRrset</span>
+        case "NOTAUTH":<span class="cov0" title="0">
+                return dns.RcodeNotAuth</span>
+        case "NOTZONE":<span class="cov0" title="0">
+                return dns.RcodeNotZone</span>
+        case "BADVERS", "BADSIG":<span class="cov0" title="0"> // dig sometimes shows BADVERS for EDNS version error
+                return dns.RcodeBadVers</span>
+        default:<span class="cov0" title="0">
+                return dns.RcodeSuccess</span>
+        }
+}
+
+func typeFromString(s string) uint16 <span class="cov8" title="1">{
+        if v, ok := dns.StringToType[strings.ToUpper(s)]; ok </span><span class="cov8" title="1">{
+                return v
+        }</span>
+        <span class="cov0" title="0">return dns.TypeNone</span>
+}
+
+func classFromString(s string) uint16 <span class="cov8" title="1">{
+        if v, ok := dns.StringToClass[strings.ToUpper(s)]; ok </span><span class="cov8" title="1">{
+                return v
+        }</span>
+        // dig often uses "IN"
+        <span class="cov0" title="0">return dns.ClassINET</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">// Package dnstest provides a configurable DNS server simulator for tests.
 package dnstest
 
 import (
         "net"
+        "strconv"
         "time"
 
         "github.com/miekg/dns"
@@ -98,36 +498,51 @@ type Response struct {
 
 // Server simulates a DNS server for use in tests.
 type Server struct {
-        // Addr is the address the server is listening on.
-        Addr string
+        Addr string // (read-only) address and port we listen on
+        Port uint16 // (read-only) port we listen on as uint16
 
-        responses map[string]*Response
+        responses map[Key]*Response
         udp       *dns.Server
         tcp       *dns.Server
 }
 
-// NewServer starts a new DNS server on addr serving the provided responses.
-// The same address and port are used for both UDP and TCP. If the port in addr
-// is "0" an available port will be chosen automatically.
-func NewServer(addr string, responses map[string]*Response) (s *Server, err error) <span class="cov8" title="1">{
+func getPort(hostport string) (port uint16, err error) <span class="cov8" title="1">{
+        var portstr string
+        if _, portstr, err = net.SplitHostPort(hostport); err == nil </span><span class="cov8" title="1">{
+                var n uint64
+                if n, err = strconv.ParseUint(portstr, 10, 16); err == nil </span><span class="cov8" title="1">{
+                        port = uint16(n)
+                }</span>
+        }
+        <span class="cov8" title="1">return</span>
+}
+
+// NewServer starts a new DNS server on 127.0.0.1 and a random port serving the provided responses.
+// The same address and port are used for both UDP and TCP.
+func NewServer(responses map[Key]*Response) (s *Server, err error) <span class="cov8" title="1">{
         var udpAddr *net.UDPAddr
-        if udpAddr, err = net.ResolveUDPAddr("udp", addr); err == nil </span><span class="cov8" title="1">{
+        if udpAddr, err = net.ResolveUDPAddr("udp", "127.0.0.1:0"); err == nil </span><span class="cov8" title="1">{
                 var udpConn *net.UDPConn
                 if udpConn, err = net.ListenUDP("udp", udpAddr); err == nil </span><span class="cov8" title="1">{
-                        var tcpListener net.Listener
-                        if tcpListener, err = net.Listen("tcp", udpConn.LocalAddr().String()); err == nil </span><span class="cov8" title="1">{
-                                s = &amp;Server{
-                                        Addr:      udpConn.LocalAddr().String(),
-                                        responses: responses,
-                                }
-                                handler := dns.HandlerFunc(s.handle)
-                                s.udp = &amp;dns.Server{PacketConn: udpConn, Handler: handler}
-                                s.tcp = &amp;dns.Server{Listener: tcpListener, Handler: handler}
-                                go s.udp.ActivateAndServe()
-                                go s.tcp.ActivateAndServe()
-                        }</span> else<span class="cov0" title="0"> {
-                                _ = udpConn.Close()
-                        }</span>
+                        listenAddr := udpConn.LocalAddr().String()
+                        var port uint16
+                        if port, err = getPort(listenAddr); err == nil </span><span class="cov8" title="1">{
+                                var tcpListener net.Listener
+                                if tcpListener, err = net.Listen("tcp", listenAddr); err == nil </span><span class="cov8" title="1">{
+                                        s = &amp;Server{
+                                                Addr:      listenAddr,
+                                                Port:      port,
+                                                responses: responses,
+                                        }
+                                        handler := dns.HandlerFunc(s.handle)
+                                        s.udp = &amp;dns.Server{PacketConn: udpConn, Handler: handler}
+                                        s.tcp = &amp;dns.Server{Listener: tcpListener, Handler: handler}
+                                        go s.udp.ActivateAndServe()
+                                        go s.tcp.ActivateAndServe()
+                                }</span> else<span class="cov0" title="0"> {
+                                        _ = udpConn.Close()
+                                }</span>
+                        }
                 }
         }
         <span class="cov8" title="1">return</span>
@@ -145,7 +560,7 @@ func (s *Server) Close() <span class="cov8" title="1">{
 
 func (s *Server) handle(w dns.ResponseWriter, req *dns.Msg) <span class="cov8" title="1">{
         for _, q := range req.Question </span><span class="cov8" title="1">{
-                if resp, ok := s.responses[Key(q.Name, q.Qtype)]; ok </span><span class="cov8" title="1">{
+                if resp, ok := s.responses[NewKey(q.Name, q.Qtype)]; ok </span><span class="cov8" title="1">{
                         if !resp.Drop </span><span class="cov8" title="1">{
                                 if resp.Delay &gt; 0 </span><span class="cov8" title="1">{
                                         time.Sleep(resp.Delay)
@@ -167,11 +582,6 @@ func (s *Server) handle(w dns.ResponseWriter, req *dns.Msg) <span class="cov8" t
                 }
         }
 }
-
-// Key returns a map key for the given question name and type.
-func Key(name string, qtype uint16) string <span class="cov8" title="1">{
-        return dns.CanonicalName(name) + "/" + dns.Type(qtype).String()
-}</span>
 </pre>
 		
 		</div>
