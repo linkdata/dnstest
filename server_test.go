@@ -17,12 +17,12 @@ func TestServer(t *testing.T) {
 	respMsg := &dns.Msg{Answer: []dns.RR{rr}}
 	respMsg.Authoritative = true
 
-	srv, err := NewServer("127.0.0.1:0", map[string]*Response{
-		Key("example.org.", dns.TypeA):      {Msg: respMsg},
-		Key("nxdomain.example.", dns.TypeA): {Rcode: dns.RcodeNameError},
-		Key("bad.example.", dns.TypeA):      {Raw: []byte{0, 1, 2, 3}},
-		Key("delay.example.", dns.TypeA):    {Delay: 10 * time.Millisecond},
-		Key("timeout.example.", dns.TypeA):  {Drop: true},
+	srv, err := NewServer(map[Key]*Response{
+		NewKey("example.org.", dns.TypeA):      {Msg: respMsg},
+		NewKey("nxdomain.example.", dns.TypeA): {Rcode: dns.RcodeNameError},
+		NewKey("bad.example.", dns.TypeA):      {Raw: []byte{0, 1, 2, 3}},
+		NewKey("delay.example.", dns.TypeA):    {Delay: 10 * time.Millisecond},
+		NewKey("timeout.example.", dns.TypeA):  {Drop: true},
 	})
 	if err != nil {
 		t.Fatalf("NewServer: %v", err)

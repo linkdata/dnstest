@@ -3,6 +3,7 @@ package dnstest
 
 import (
 	"net"
+	"strconv"
 	"time"
 
 	"github.com/miekg/dns"
@@ -27,35 +28,50 @@ type Response struct {
 
 // Server simulates a DNS server for use in tests.
 type Server struct {
-	// Addr is the address the server is listening on.
-	Addr string
+	Addr string // (read-only) address and port we listen on
+	Port uint16 // (read-only) port we listen on as uint16
 
-	responses map[string]*Response
+	responses map[Key]*Response
 	udp       *dns.Server
 	tcp       *dns.Server
 }
 
-// NewServer starts a new DNS server on addr serving the provided responses.
-// The same address and port are used for both UDP and TCP. If the port in addr
-// is "0" an available port will be chosen automatically.
-func NewServer(addr string, responses map[string]*Response) (s *Server, err error) {
+func getPort(hostport string) (port uint16, err error) {
+	var portstr string
+	if _, portstr, err = net.SplitHostPort(hostport); err == nil {
+		var n uint64
+		if n, err = strconv.ParseUint(portstr, 10, 16); err == nil {
+			port = uint16(n)
+		}
+	}
+	return
+}
+
+// NewServer starts a new DNS server on 127.0.0.1 and a random port serving the provided responses.
+// The same address and port are used for both UDP and TCP.
+func NewServer(responses map[Key]*Response) (s *Server, err error) {
 	var udpAddr *net.UDPAddr
-	if udpAddr, err = net.ResolveUDPAddr("udp", addr); err == nil {
+	if udpAddr, err = net.ResolveUDPAddr("udp", "127.0.0.1:0"); err == nil {
 		var udpConn *net.UDPConn
 		if udpConn, err = net.ListenUDP("udp", udpAddr); err == nil {
-			var tcpListener net.Listener
-			if tcpListener, err = net.Listen("tcp", udpConn.LocalAddr().String()); err == nil {
-				s = &Server{
-					Addr:      udpConn.LocalAddr().String(),
-					responses: responses,
+			listenAddr := udpConn.LocalAddr().String()
+			var port uint16
+			if port, err = getPort(listenAddr); err == nil {
+				var tcpListener net.Listener
+				if tcpListener, err = net.Listen("tcp", listenAddr); err == nil {
+					s = &Server{
+						Addr:      listenAddr,
+						Port:      port,
+						responses: responses,
+					}
+					handler := dns.HandlerFunc(s.handle)
+					s.udp = &dns.Server{PacketConn: udpConn, Handler: handler}
+					s.tcp = &dns.Server{Listener: tcpListener, Handler: handler}
+					go s.udp.ActivateAndServe()
+					go s.tcp.ActivateAndServe()
+				} else {
+					_ = udpConn.Close()
 				}
-				handler := dns.HandlerFunc(s.handle)
-				s.udp = &dns.Server{PacketConn: udpConn, Handler: handler}
-				s.tcp = &dns.Server{Listener: tcpListener, Handler: handler}
-				go s.udp.ActivateAndServe()
-				go s.tcp.ActivateAndServe()
-			} else {
-				_ = udpConn.Close()
 			}
 		}
 	}
@@ -74,7 +90,7 @@ func (s *Server) Close() {
 
 func (s *Server) handle(w dns.ResponseWriter, req *dns.Msg) {
 	for _, q := range req.Question {
-		if resp, ok := s.responses[Key(q.Name, q.Qtype)]; ok {
+		if resp, ok := s.responses[NewKey(q.Name, q.Qtype)]; ok {
 			if !resp.Drop {
 				if resp.Delay > 0 {
 					time.Sleep(resp.Delay)
@@ -95,9 +111,4 @@ func (s *Server) handle(w dns.ResponseWriter, req *dns.Msg) {
 			}
 		}
 	}
-}
-
-// Key returns a map key for the given question name and type.
-func Key(name string, qtype uint16) string {
-	return dns.CanonicalName(name) + "/" + dns.Type(qtype).String()
 }
