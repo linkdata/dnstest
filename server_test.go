@@ -53,6 +53,7 @@ func TestServer(t *testing.T) {
 	if !in.Authoritative {
 		t.Fatal("expected AUTH answer")
 	}
+	in.Authoritative = false // should have no effect on the next query
 	got = fmt.Sprint(in.Answer)
 	if want != got {
 		t.Fatalf("\nwant %q\n got %q\n", want, got)
