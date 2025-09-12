@@ -76,14 +76,16 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) {
 		}
 
 		// HEADER line (id/opcode/status)
-		if strings.HasPrefix(line, ";; ->>HEADER<<-") || (!seenHeaderLine && strings.HasPrefix(line, ";; opcode:")) {
-			seenHeaderLine = true
-			if m := headerRe.FindStringSubmatch(line); m != nil {
-				msg.Id = parseUint16(m[3])
-				msg.Opcode = opcodeFromString(m[1])
-				msg.Rcode = rcodeFromString(m[2])
+		if !seenHeaderLine {
+			if strings.HasPrefix(line, ";; ->>HEADER<<-") || strings.HasPrefix(line, ";; opcode:") {
+				seenHeaderLine = true
+				if m := headerRe.FindStringSubmatch(line); m != nil {
+					msg.Id = parseUint16(m[3])
+					msg.Opcode = opcodeFromString(m[1])
+					msg.Rcode = rcodeFromString(m[2])
+				}
+				continue
 			}
-			continue
 		}
 
 		// FLAGS / COUNTS (may be same line as HEADER or the next one)
