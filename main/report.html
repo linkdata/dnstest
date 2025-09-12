@@ -146,11 +146,11 @@ func (s *Server) Close() <span class="cov8" title="1">{
 func (s *Server) handle(w dns.ResponseWriter, req *dns.Msg) <span class="cov8" title="1">{
         for _, q := range req.Question </span><span class="cov8" title="1">{
                 if resp, ok := s.responses[Key(q.Name, q.Qtype)]; ok </span><span class="cov8" title="1">{
-                        if resp.Delay &gt; 0 </span><span class="cov8" title="1">{
-                                time.Sleep(resp.Delay)
-                        }</span>
-                        <span class="cov8" title="1">if !resp.Drop </span><span class="cov8" title="1">{
-                                if resp.Raw != nil </span><span class="cov8" title="1">{
+                        if !resp.Drop </span><span class="cov8" title="1">{
+                                if resp.Delay &gt; 0 </span><span class="cov8" title="1">{
+                                        time.Sleep(resp.Delay)
+                                }</span>
+                                <span class="cov8" title="1">if resp.Raw != nil </span><span class="cov8" title="1">{
                                         _, _ = w.Write(resp.Raw)
                                         return
                                 }</span>
