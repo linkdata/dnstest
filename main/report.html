@@ -170,7 +170,7 @@ func (s *Server) handle(w dns.ResponseWriter, req *dns.Msg) <span class="cov8" t
 
 // Key returns a map key for the given question name and type.
 func Key(name string, qtype uint16) string <span class="cov8" title="1">{
-        return dns.CanonicalName(name) + "/" + dns.TypeToString[qtype]
+        return dns.CanonicalName(name) + "/" + dns.Type(qtype).String()
 }</span>
 </pre>
 		
