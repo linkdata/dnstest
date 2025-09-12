@@ -59,7 +59,7 @@
 				
 				<option value="file1">github.com/linkdata/dnstest/network.go (0.0%)</option>
 				
-				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (80.0%)</option>
+				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (82.3%)</option>
 				
 				<option value="file3">github.com/linkdata/dnstest/server.go (97.6%)</option>
 				
@@ -167,9 +167,10 @@ func isEmptyMsg(m *dns.Msg) bool <span class="cov8" title="1">{
 //
 // If it reads a line starting with "; &lt;&lt;&gt;&gt; " and it has found data, it returns.
 // This allows reading consecutive messages from a single stream.
-func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) <span class="cov8" title="1">{
+func ParseDigOutput(r io.Reader) ([]Exchange, error) <span class="cov8" title="1">{
         var (
-                msg            dns.Msg
+                msg            = new(dns.Msg)
+                retv           []Exchange
                 srvaddr        string
                 section        = "" // "", "question", "answer", "authority", "additional", "opt"
                 rrBuf          []string
@@ -187,9 +188,11 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) <span class="cov8" ti
 
                 // DIG version line (separates entries)
                 <span class="cov8" title="1">if strings.HasPrefix(line, "; &lt;&lt;&gt;&gt; ") </span><span class="cov8" title="1">{
-                        if !isEmptyMsg(&amp;msg) </span><span class="cov8" title="1">{
-                                break</span>
-                        }
+                        if !isEmptyMsg(msg) </span><span class="cov8" title="1">{
+                                retv = append(retv, Exchange{Server: srvaddr, Msg: msg})
+                                msg = new(dns.Msg)
+                                srvaddr = ""
+                        }</span>
                         <span class="cov8" title="1">continue</span>
                 }
 
@@ -220,7 +223,7 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) <span class="cov8" ti
                 // FLAGS / COUNTS (may be same line as HEADER or the next one)
                 <span class="cov8" title="1">if strings.HasPrefix(line, ";; flags:") || (seenHeaderLine &amp;&amp; strings.HasPrefix(line, "flags:")) </span><span class="cov8" title="1">{
                         if m := flagsRe.FindStringSubmatch(line); m != nil </span><span class="cov8" title="1">{
-                                setFlags(&amp;msg, m[1])
+                                setFlags(msg, m[1])
                         }</span>
                         // counts are not strictly required to be set in MsgHdr; dns.Msg
                         // derives them from the slices on pack. We parse them only to avoid surprises.
@@ -333,9 +336,9 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) <span class="cov8" ti
                                 rr, err = dns.NewRR(strings.Join(fieldsClean(rrLine), " "))
                         }</span>
                         <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
-                                return nil, srvaddr, fmt.Errorf("parse RR in %s: %q: %w", section, rrLine, err)
+                                return nil, fmt.Errorf("parse RR in %s: %q: %w", section, rrLine, err)
                         }</span>
-                        <span class="cov8" title="1">if rr == nil </span><span class="cov0" title="0">{
+                        <span class="cov8" title="1">if rr == nil </span><span class="cov8" title="1">{
                                 continue</span>
                         }
                         <span class="cov8" title="1">switch section </span>{
@@ -358,14 +361,14 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) <span class="cov8" ti
         }
 
         <span class="cov8" title="1">if err := sc.Err(); err != nil </span><span class="cov0" title="0">{
-                return nil, srvaddr, err
+                return nil, err
         }</span>
 
-        <span class="cov8" title="1">if isEmptyMsg(&amp;msg) </span><span class="cov8" title="1">{
-                return nil, "", io.EOF
+        <span class="cov8" title="1">if !isEmptyMsg(msg) </span><span class="cov8" title="1">{
+                retv = append(retv, Exchange{Server: srvaddr, Msg: msg})
         }</span>
 
-        <span class="cov8" title="1">return &amp;msg, srvaddr, nil</span>
+        <span class="cov8" title="1">return retv, nil</span>
 }
 
 // --- helpers ---
@@ -466,7 +469,7 @@ func typeFromString(s string) uint16 <span class="cov8" title="1">{
         if v, ok := dns.StringToType[strings.ToUpper(s)]; ok </span><span class="cov8" title="1">{
                 return v
         }</span>
-        <span class="cov0" title="0">return dns.TypeNone</span>
+        <span class="cov8" title="1">return dns.TypeNone</span>
 }
 
 func classFromString(s string) uint16 <span class="cov8" title="1">{
@@ -474,7 +477,7 @@ func classFromString(s string) uint16 <span class="cov8" title="1">{
                 return v
         }</span>
         // dig often uses "IN"
-        <span class="cov0" title="0">return dns.ClassINET</span>
+        <span class="cov8" title="1">return dns.ClassINET</span>
 }
 </pre>
 		
