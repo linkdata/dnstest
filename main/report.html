@@ -59,7 +59,7 @@
 				
 				<option value="file1">github.com/linkdata/dnstest/network.go (0.0%)</option>
 				
-				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (77.0%)</option>
+				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (80.0%)</option>
 				
 				<option value="file3">github.com/linkdata/dnstest/server.go (97.6%)</option>
 				
@@ -151,6 +151,15 @@ var (
         ednsRe = regexp.MustCompile(`EDNS:\s*version:?[\s]*([0-9]+)[,;]?\s*flags:\s*([a-z ]*);?\s*udp:\s*([0-9]+)`)
 )
 
+func isEmptyMsg(m *dns.Msg) bool <span class="cov8" title="1">{
+        if m != nil </span><span class="cov8" title="1">{
+                if len(m.Question) &gt; 0 || len(m.Answer) &gt; 0 || len(m.Extra) &gt; 0 || len(m.Ns) &gt; 0 || m.Rcode != dns.RcodeSuccess </span><span class="cov8" title="1">{
+                        return false
+                }</span>
+        }
+        <span class="cov8" title="1">return true</span>
+}
+
 // ParseDigOutput turns the stdout text of `dig` into a dns.Msg, the server that
 // was queried (as "host" or "host#port" if available), and an error.
 // It best-effort fills MsgHdr (id, opcode, rcode, flags), Question, Answer,
@@ -177,8 +186,11 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) <span class="cov8" ti
                 }
 
                 // DIG version line (separates entries)
-                <span class="cov8" title="1">if strings.HasPrefix(line, "; &lt;&lt;&gt;&gt; ") &amp;&amp; seenHeaderLine </span><span class="cov0" title="0">{
-                        break</span>
+                <span class="cov8" title="1">if strings.HasPrefix(line, "; &lt;&lt;&gt;&gt; ") </span><span class="cov8" title="1">{
+                        if !isEmptyMsg(&amp;msg) </span><span class="cov8" title="1">{
+                                break</span>
+                        }
+                        <span class="cov8" title="1">continue</span>
                 }
 
                 // SERVER line
@@ -347,13 +359,10 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) <span class="cov8" ti
                 return nil, srvaddr, err
         }</span>
 
-        // If we never saw a header but we have content, it's still a usable Msg.
-        // Ensure Response bit usually true for dig outputs.
-        <span class="cov8" title="1">if !msg.Response </span><span class="cov0" title="0">{
-                msg.Response = true
+        <span class="cov8" title="1">if isEmptyMsg(&amp;msg) </span><span class="cov8" title="1">{
+                return nil, "", io.EOF
         }</span>
 
-        // Sanity: must have at least one question to be a proper response, but we don't enforce.
         <span class="cov8" title="1">return &amp;msg, srvaddr, nil</span>
 }
 
@@ -388,7 +397,7 @@ func setFlags(msg *dns.Msg, flags string) <span class="cov8" title="1">{
                 switch f </span>{
                 case "qr":<span class="cov8" title="1">
                         msg.Response = true</span>
-                case "aa":<span class="cov0" title="0">
+                case "aa":<span class="cov8" title="1">
                         msg.Authoritative = true</span>
                 case "tc":<span class="cov0" title="0">
                         msg.Truncated = true</span>
