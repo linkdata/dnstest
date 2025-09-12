@@ -1,60 +1,59 @@
-; <<>> recursive <<>> @192.36.148.17 NS com.
-;; opcode: QUERY, status: NOERROR, id: 65420
+; <<>> recursive <<>> @198.41.0.4 NS com.
+;; opcode: QUERY, status: NOERROR, id: 65395
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 13, ADDITIONAL: 27
 
 ;; OPT PSEUDOSECTION:
-; EDNS: version 0; flags:; udp: 1232
-; COOKIE: f491522e48b09f1a0100000068c4028b43e1d1374611b246
+; EDNS: version 0; flags:; udp: 4096
 
 ;; QUESTION SECTION:
 ;com.	IN	 NS
 
 ;; AUTHORITY SECTION:
-com.	172800	IN	NS	f.gtld-servers.net.
-com.	172800	IN	NS	e.gtld-servers.net.
-com.	172800	IN	NS	a.gtld-servers.net.
-com.	172800	IN	NS	b.gtld-servers.net.
+com.	172800	IN	NS	l.gtld-servers.net.
+com.	172800	IN	NS	j.gtld-servers.net.
+com.	172800	IN	NS	h.gtld-servers.net.
 com.	172800	IN	NS	d.gtld-servers.net.
+com.	172800	IN	NS	b.gtld-servers.net.
+com.	172800	IN	NS	f.gtld-servers.net.
+com.	172800	IN	NS	k.gtld-servers.net.
 com.	172800	IN	NS	m.gtld-servers.net.
 com.	172800	IN	NS	i.gtld-servers.net.
-com.	172800	IN	NS	k.gtld-servers.net.
-com.	172800	IN	NS	j.gtld-servers.net.
-com.	172800	IN	NS	c.gtld-servers.net.
-com.	172800	IN	NS	h.gtld-servers.net.
 com.	172800	IN	NS	g.gtld-servers.net.
-com.	172800	IN	NS	l.gtld-servers.net.
+com.	172800	IN	NS	a.gtld-servers.net.
+com.	172800	IN	NS	c.gtld-servers.net.
+com.	172800	IN	NS	e.gtld-servers.net.
 
 ;; ADDITIONAL SECTION:
-m.gtld-servers.net.	172800	IN	A	192.55.83.30
 l.gtld-servers.net.	172800	IN	A	192.41.162.30
-k.gtld-servers.net.	172800	IN	A	192.52.178.30
-j.gtld-servers.net.	172800	IN	A	192.48.79.30
-i.gtld-servers.net.	172800	IN	A	192.43.172.30
-h.gtld-servers.net.	172800	IN	A	192.54.112.30
-g.gtld-servers.net.	172800	IN	A	192.42.93.30
-f.gtld-servers.net.	172800	IN	A	192.35.51.30
-e.gtld-servers.net.	172800	IN	A	192.12.94.30
-d.gtld-servers.net.	172800	IN	A	192.31.80.30
-c.gtld-servers.net.	172800	IN	A	192.26.92.30
-b.gtld-servers.net.	172800	IN	A	192.33.14.30
-a.gtld-servers.net.	172800	IN	A	192.5.6.30
-m.gtld-servers.net.	172800	IN	AAAA	2001:501:b1f9::30
 l.gtld-servers.net.	172800	IN	AAAA	2001:500:d937::30
-k.gtld-servers.net.	172800	IN	AAAA	2001:503:d2d::30
+j.gtld-servers.net.	172800	IN	A	192.48.79.30
 j.gtld-servers.net.	172800	IN	AAAA	2001:502:7094::30
-i.gtld-servers.net.	172800	IN	AAAA	2001:503:39c1::30
+h.gtld-servers.net.	172800	IN	A	192.54.112.30
 h.gtld-servers.net.	172800	IN	AAAA	2001:502:8cc::30
-g.gtld-servers.net.	172800	IN	AAAA	2001:503:eea3::30
-f.gtld-servers.net.	172800	IN	AAAA	2001:503:d414::30
-e.gtld-servers.net.	172800	IN	AAAA	2001:502:1ca1::30
+d.gtld-servers.net.	172800	IN	A	192.31.80.30
 d.gtld-servers.net.	172800	IN	AAAA	2001:500:856e::30
-c.gtld-servers.net.	172800	IN	AAAA	2001:503:83eb::30
+b.gtld-servers.net.	172800	IN	A	192.33.14.30
 b.gtld-servers.net.	172800	IN	AAAA	2001:503:231d::2:30
+f.gtld-servers.net.	172800	IN	A	192.35.51.30
+f.gtld-servers.net.	172800	IN	AAAA	2001:503:d414::30
+k.gtld-servers.net.	172800	IN	A	192.52.178.30
+k.gtld-servers.net.	172800	IN	AAAA	2001:503:d2d::30
+m.gtld-servers.net.	172800	IN	A	192.55.83.30
+m.gtld-servers.net.	172800	IN	AAAA	2001:501:b1f9::30
+i.gtld-servers.net.	172800	IN	A	192.43.172.30
+i.gtld-servers.net.	172800	IN	AAAA	2001:503:39c1::30
+g.gtld-servers.net.	172800	IN	A	192.42.93.30
+g.gtld-servers.net.	172800	IN	AAAA	2001:503:eea3::30
+a.gtld-servers.net.	172800	IN	A	192.5.6.30
 a.gtld-servers.net.	172800	IN	AAAA	2001:503:a83e::2:30
+c.gtld-servers.net.	172800	IN	A	192.26.92.30
+c.gtld-servers.net.	172800	IN	AAAA	2001:503:83eb::30
+e.gtld-servers.net.	172800	IN	A	192.12.94.30
+e.gtld-servers.net.	172800	IN	AAAA	2001:502:1ca1::30
 
-;; SERVER: 192.36.148.17
+;; SERVER: 198.41.0.4
 ; <<>> recursive <<>> @192.5.6.30 NS amazon.com.
-;; opcode: QUERY, status: NOERROR, id: 26944
+;; opcode: QUERY, status: NOERROR, id: 27336
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 8, ADDITIONAL: 5
 
 ;; OPT PSEUDOSECTION:
@@ -81,7 +80,7 @@ ns2.amzndns.com.	172800	IN	AAAA	2610:a1:1016::10
 
 ;; SERVER: 192.5.6.30
 ; <<>> recursive <<>> @156.154.64.10 NS aws.amazon.com.
-;; opcode: QUERY, status: NOERROR, id: 53340
+;; opcode: QUERY, status: NOERROR, id: 46273
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
@@ -100,42 +99,41 @@ aws.amazon.com.	7200	IN	CNAME	tp.8e49140c2-frontier.amazon.com.
 8e49140c2-frontier.amazon.com.	900	IN	NS	ns-2017.awsdns-60.co.uk.
 
 ;; SERVER: 156.154.64.10
-; <<>> recursive <<>> @192.36.148.17 A org.
-;; opcode: QUERY, status: NOERROR, id: 55228
+; <<>> recursive <<>> @198.41.0.4 A org.
+;; opcode: QUERY, status: NOERROR, id: 46263
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 6, ADDITIONAL: 13
 
 ;; OPT PSEUDOSECTION:
-; EDNS: version 0; flags:; udp: 1232
-; COOKIE: f491522e48b09f1a0100000068c4028b43e1d1374611b246
+; EDNS: version 0; flags:; udp: 4096
 
 ;; QUESTION SECTION:
 ;org.	IN	 A
 
 ;; AUTHORITY SECTION:
+org.	172800	IN	NS	a2.org.afilias-nst.info.
+org.	172800	IN	NS	b2.org.afilias-nst.org.
 org.	172800	IN	NS	d0.org.afilias-nst.org.
 org.	172800	IN	NS	a0.org.afilias-nst.info.
-org.	172800	IN	NS	b2.org.afilias-nst.org.
-org.	172800	IN	NS	a2.org.afilias-nst.info.
 org.	172800	IN	NS	b0.org.afilias-nst.org.
 org.	172800	IN	NS	c0.org.afilias-nst.info.
 
 ;; ADDITIONAL SECTION:
-d0.org.afilias-nst.org.	172800	IN	A	199.19.57.1
-c0.org.afilias-nst.info.	172800	IN	A	199.19.53.1
-b2.org.afilias-nst.org.	172800	IN	A	199.249.120.1
-b0.org.afilias-nst.org.	172800	IN	A	199.19.54.1
 a2.org.afilias-nst.info.	172800	IN	A	199.249.112.1
-a0.org.afilias-nst.info.	172800	IN	A	199.19.56.1
-d0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:f::1
-c0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:b::1
-b2.org.afilias-nst.org.	172800	IN	AAAA	2001:500:48::1
-b0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:c::1
 a2.org.afilias-nst.info.	172800	IN	AAAA	2001:500:40::1
+b2.org.afilias-nst.org.	172800	IN	A	199.249.120.1
+b2.org.afilias-nst.org.	172800	IN	AAAA	2001:500:48::1
+d0.org.afilias-nst.org.	172800	IN	A	199.19.57.1
+d0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:f::1
+a0.org.afilias-nst.info.	172800	IN	A	199.19.56.1
 a0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:e::1
+b0.org.afilias-nst.org.	172800	IN	A	199.19.54.1
+b0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:c::1
+c0.org.afilias-nst.info.	172800	IN	A	199.19.53.1
+c0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:b::1
 
-;; SERVER: 192.36.148.17
+;; SERVER: 198.41.0.4
 ; <<>> recursive <<>> @199.19.53.1 A awsdns-18.org.
-;; opcode: QUERY, status: NOERROR, id: 2575
+;; opcode: QUERY, status: NOERROR, id: 18957
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 4, ADDITIONAL: 9
 
 ;; OPT PSEUDOSECTION:
@@ -145,10 +143,10 @@ a0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:e::1
 ;awsdns-18.org.	IN	 A
 
 ;; AUTHORITY SECTION:
-awsdns-18.org.	3600	IN	NS	g-ns-1045.awsdns-18.org.
+awsdns-18.org.	3600	IN	NS	g-ns-146.awsdns-18.org.
 awsdns-18.org.	3600	IN	NS	g-ns-724.awsdns-18.org.
 awsdns-18.org.	3600	IN	NS	g-ns-1618.awsdns-18.org.
-awsdns-18.org.	3600	IN	NS	g-ns-146.awsdns-18.org.
+awsdns-18.org.	3600	IN	NS	g-ns-1045.awsdns-18.org.
 
 ;; ADDITIONAL SECTION:
 g-ns-146.awsdns-18.org.	3600	IN	A	205.251.192.146
@@ -162,7 +160,7 @@ g-ns-1618.awsdns-18.org.	3600	IN	AAAA	2600:9000:5306:5200::1
 
 ;; SERVER: 199.19.53.1
 ; <<>> recursive <<>> @205.251.192.146 A ns-1172.awsdns-18.org.
-;; opcode: QUERY, status: NOERROR, id: 45727
+;; opcode: QUERY, status: NOERROR, id: 48934
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 9
 
 ;; OPT PSEUDOSECTION:
@@ -192,70 +190,69 @@ g-ns-724.awsdns-18.org.	172800	IN	AAAA	2600:9000:5302:d400::1
 
 ;; SERVER: 205.251.192.146
 ; <<>> recursive <<>> @205.251.196.148 NS console.aws.amazon.com.
-;; opcode: QUERY, status: REFUSED, id: 30596
+;; opcode: QUERY, status: REFUSED, id: 12205
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 0
 
 ;; QUESTION SECTION:
 ;console.aws.amazon.com.	IN	 NS
 
 ;; SERVER: 205.251.196.148
-; <<>> recursive <<>> @192.36.148.17 A console.aws.amazon.com.
-;; opcode: QUERY, status: NOERROR, id: 3045
+; <<>> recursive <<>> @198.41.0.4 A console.aws.amazon.com.
+;; opcode: QUERY, status: NOERROR, id: 7054
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 13, ADDITIONAL: 27
 
 ;; OPT PSEUDOSECTION:
-; EDNS: version 0; flags:; udp: 1232
-; COOKIE: f491522e48b09f1a0100000068c4028b43e1d1374611b246
+; EDNS: version 0; flags:; udp: 4096
 
 ;; QUESTION SECTION:
 ;console.aws.amazon.com.	IN	 A
 
 ;; AUTHORITY SECTION:
-com.	172800	IN	NS	d.gtld-servers.net.
-com.	172800	IN	NS	i.gtld-servers.net.
 com.	172800	IN	NS	l.gtld-servers.net.
-com.	172800	IN	NS	e.gtld-servers.net.
-com.	172800	IN	NS	c.gtld-servers.net.
-com.	172800	IN	NS	b.gtld-servers.net.
-com.	172800	IN	NS	a.gtld-servers.net.
-com.	172800	IN	NS	f.gtld-servers.net.
 com.	172800	IN	NS	j.gtld-servers.net.
-com.	172800	IN	NS	m.gtld-servers.net.
-com.	172800	IN	NS	g.gtld-servers.net.
 com.	172800	IN	NS	h.gtld-servers.net.
+com.	172800	IN	NS	d.gtld-servers.net.
+com.	172800	IN	NS	b.gtld-servers.net.
+com.	172800	IN	NS	f.gtld-servers.net.
 com.	172800	IN	NS	k.gtld-servers.net.
+com.	172800	IN	NS	m.gtld-servers.net.
+com.	172800	IN	NS	i.gtld-servers.net.
+com.	172800	IN	NS	g.gtld-servers.net.
+com.	172800	IN	NS	a.gtld-servers.net.
+com.	172800	IN	NS	c.gtld-servers.net.
+com.	172800	IN	NS	e.gtld-servers.net.
 
 ;; ADDITIONAL SECTION:
-m.gtld-servers.net.	172800	IN	A	192.55.83.30
 l.gtld-servers.net.	172800	IN	A	192.41.162.30
-k.gtld-servers.net.	172800	IN	A	192.52.178.30
-j.gtld-servers.net.	172800	IN	A	192.48.79.30
-i.gtld-servers.net.	172800	IN	A	192.43.172.30
-h.gtld-servers.net.	172800	IN	A	192.54.112.30
-g.gtld-servers.net.	172800	IN	A	192.42.93.30
-f.gtld-servers.net.	172800	IN	A	192.35.51.30
-e.gtld-servers.net.	172800	IN	A	192.12.94.30
-d.gtld-servers.net.	172800	IN	A	192.31.80.30
-c.gtld-servers.net.	172800	IN	A	192.26.92.30
-b.gtld-servers.net.	172800	IN	A	192.33.14.30
-a.gtld-servers.net.	172800	IN	A	192.5.6.30
-m.gtld-servers.net.	172800	IN	AAAA	2001:501:b1f9::30
 l.gtld-servers.net.	172800	IN	AAAA	2001:500:d937::30
-k.gtld-servers.net.	172800	IN	AAAA	2001:503:d2d::30
+j.gtld-servers.net.	172800	IN	A	192.48.79.30
 j.gtld-servers.net.	172800	IN	AAAA	2001:502:7094::30
-i.gtld-servers.net.	172800	IN	AAAA	2001:503:39c1::30
+h.gtld-servers.net.	172800	IN	A	192.54.112.30
 h.gtld-servers.net.	172800	IN	AAAA	2001:502:8cc::30
-g.gtld-servers.net.	172800	IN	AAAA	2001:503:eea3::30
-f.gtld-servers.net.	172800	IN	AAAA	2001:503:d414::30
-e.gtld-servers.net.	172800	IN	AAAA	2001:502:1ca1::30
+d.gtld-servers.net.	172800	IN	A	192.31.80.30
 d.gtld-servers.net.	172800	IN	AAAA	2001:500:856e::30
-c.gtld-servers.net.	172800	IN	AAAA	2001:503:83eb::30
+b.gtld-servers.net.	172800	IN	A	192.33.14.30
 b.gtld-servers.net.	172800	IN	AAAA	2001:503:231d::2:30
+f.gtld-servers.net.	172800	IN	A	192.35.51.30
+f.gtld-servers.net.	172800	IN	AAAA	2001:503:d414::30
+k.gtld-servers.net.	172800	IN	A	192.52.178.30
+k.gtld-servers.net.	172800	IN	AAAA	2001:503:d2d::30
+m.gtld-servers.net.	172800	IN	A	192.55.83.30
+m.gtld-servers.net.	172800	IN	AAAA	2001:501:b1f9::30
+i.gtld-servers.net.	172800	IN	A	192.43.172.30
+i.gtld-servers.net.	172800	IN	AAAA	2001:503:39c1::30
+g.gtld-servers.net.	172800	IN	A	192.42.93.30
+g.gtld-servers.net.	172800	IN	AAAA	2001:503:eea3::30
+a.gtld-servers.net.	172800	IN	A	192.5.6.30
 a.gtld-servers.net.	172800	IN	AAAA	2001:503:a83e::2:30
+c.gtld-servers.net.	172800	IN	A	192.26.92.30
+c.gtld-servers.net.	172800	IN	AAAA	2001:503:83eb::30
+e.gtld-servers.net.	172800	IN	A	192.12.94.30
+e.gtld-servers.net.	172800	IN	AAAA	2001:502:1ca1::30
 
-;; SERVER: 192.36.148.17
+;; SERVER: 198.41.0.4
 ; <<>> recursive <<>> @192.5.6.30 A console.aws.amazon.com.
-;; opcode: QUERY, status: NOERROR, id: 44503
+;; opcode: QUERY, status: NOERROR, id: 25420
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 8, ADDITIONAL: 5
 
 ;; OPT PSEUDOSECTION:
@@ -282,7 +279,7 @@ ns2.amzndns.com.	172800	IN	AAAA	2610:a1:1016::10
 
 ;; SERVER: 192.5.6.30
 ; <<>> recursive <<>> @156.154.64.10 A console.aws.amazon.com.
-;; opcode: QUERY, status: NOERROR, id: 18714
+;; opcode: QUERY, status: NOERROR, id: 63818
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
@@ -295,69 +292,68 @@ ns2.amzndns.com.	172800	IN	AAAA	2610:a1:1016::10
 console.aws.amazon.com.	7200	IN	CNAME	console.cname-proxy.amazon.com.
 
 ;; AUTHORITY SECTION:
-cname-proxy.amazon.com.	60	IN	NS	ns-429.awsdns-53.com.
-cname-proxy.amazon.com.	60	IN	NS	ns-689.awsdns-22.net.
 cname-proxy.amazon.com.	60	IN	NS	ns-1313.awsdns-36.org.
 cname-proxy.amazon.com.	60	IN	NS	ns-1878.awsdns-42.co.uk.
+cname-proxy.amazon.com.	60	IN	NS	ns-429.awsdns-53.com.
+cname-proxy.amazon.com.	60	IN	NS	ns-689.awsdns-22.net.
 
 ;; SERVER: 156.154.64.10
-; <<>> recursive <<>> @192.36.148.17 A console.cname-proxy.amazon.com.
-;; opcode: QUERY, status: NOERROR, id: 45117
+; <<>> recursive <<>> @198.41.0.4 A console.cname-proxy.amazon.com.
+;; opcode: QUERY, status: NOERROR, id: 26253
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 13, ADDITIONAL: 27
 
 ;; OPT PSEUDOSECTION:
-; EDNS: version 0; flags:; udp: 1232
-; COOKIE: f491522e48b09f1a0100000068c4028b43e1d1374611b246
+; EDNS: version 0; flags:; udp: 4096
 
 ;; QUESTION SECTION:
 ;console.cname-proxy.amazon.com.	IN	 A
 
 ;; AUTHORITY SECTION:
-com.	172800	IN	NS	k.gtld-servers.net.
-com.	172800	IN	NS	c.gtld-servers.net.
-com.	172800	IN	NS	i.gtld-servers.net.
-com.	172800	IN	NS	m.gtld-servers.net.
 com.	172800	IN	NS	l.gtld-servers.net.
-com.	172800	IN	NS	g.gtld-servers.net.
-com.	172800	IN	NS	f.gtld-servers.net.
-com.	172800	IN	NS	b.gtld-servers.net.
-com.	172800	IN	NS	d.gtld-servers.net.
-com.	172800	IN	NS	a.gtld-servers.net.
-com.	172800	IN	NS	e.gtld-servers.net.
-com.	172800	IN	NS	h.gtld-servers.net.
 com.	172800	IN	NS	j.gtld-servers.net.
+com.	172800	IN	NS	h.gtld-servers.net.
+com.	172800	IN	NS	d.gtld-servers.net.
+com.	172800	IN	NS	b.gtld-servers.net.
+com.	172800	IN	NS	f.gtld-servers.net.
+com.	172800	IN	NS	k.gtld-servers.net.
+com.	172800	IN	NS	m.gtld-servers.net.
+com.	172800	IN	NS	i.gtld-servers.net.
+com.	172800	IN	NS	g.gtld-servers.net.
+com.	172800	IN	NS	a.gtld-servers.net.
+com.	172800	IN	NS	c.gtld-servers.net.
+com.	172800	IN	NS	e.gtld-servers.net.
 
 ;; ADDITIONAL SECTION:
-m.gtld-servers.net.	172800	IN	A	192.55.83.30
 l.gtld-servers.net.	172800	IN	A	192.41.162.30
-k.gtld-servers.net.	172800	IN	A	192.52.178.30
-j.gtld-servers.net.	172800	IN	A	192.48.79.30
-i.gtld-servers.net.	172800	IN	A	192.43.172.30
-h.gtld-servers.net.	172800	IN	A	192.54.112.30
-g.gtld-servers.net.	172800	IN	A	192.42.93.30
-f.gtld-servers.net.	172800	IN	A	192.35.51.30
-e.gtld-servers.net.	172800	IN	A	192.12.94.30
-d.gtld-servers.net.	172800	IN	A	192.31.80.30
-c.gtld-servers.net.	172800	IN	A	192.26.92.30
-b.gtld-servers.net.	172800	IN	A	192.33.14.30
-a.gtld-servers.net.	172800	IN	A	192.5.6.30
-m.gtld-servers.net.	172800	IN	AAAA	2001:501:b1f9::30
 l.gtld-servers.net.	172800	IN	AAAA	2001:500:d937::30
-k.gtld-servers.net.	172800	IN	AAAA	2001:503:d2d::30
+j.gtld-servers.net.	172800	IN	A	192.48.79.30
 j.gtld-servers.net.	172800	IN	AAAA	2001:502:7094::30
-i.gtld-servers.net.	172800	IN	AAAA	2001:503:39c1::30
+h.gtld-servers.net.	172800	IN	A	192.54.112.30
 h.gtld-servers.net.	172800	IN	AAAA	2001:502:8cc::30
-g.gtld-servers.net.	172800	IN	AAAA	2001:503:eea3::30
-f.gtld-servers.net.	172800	IN	AAAA	2001:503:d414::30
-e.gtld-servers.net.	172800	IN	AAAA	2001:502:1ca1::30
+d.gtld-servers.net.	172800	IN	A	192.31.80.30
 d.gtld-servers.net.	172800	IN	AAAA	2001:500:856e::30
-c.gtld-servers.net.	172800	IN	AAAA	2001:503:83eb::30
+b.gtld-servers.net.	172800	IN	A	192.33.14.30
 b.gtld-servers.net.	172800	IN	AAAA	2001:503:231d::2:30
+f.gtld-servers.net.	172800	IN	A	192.35.51.30
+f.gtld-servers.net.	172800	IN	AAAA	2001:503:d414::30
+k.gtld-servers.net.	172800	IN	A	192.52.178.30
+k.gtld-servers.net.	172800	IN	AAAA	2001:503:d2d::30
+m.gtld-servers.net.	172800	IN	A	192.55.83.30
+m.gtld-servers.net.	172800	IN	AAAA	2001:501:b1f9::30
+i.gtld-servers.net.	172800	IN	A	192.43.172.30
+i.gtld-servers.net.	172800	IN	AAAA	2001:503:39c1::30
+g.gtld-servers.net.	172800	IN	A	192.42.93.30
+g.gtld-servers.net.	172800	IN	AAAA	2001:503:eea3::30
+a.gtld-servers.net.	172800	IN	A	192.5.6.30
 a.gtld-servers.net.	172800	IN	AAAA	2001:503:a83e::2:30
+c.gtld-servers.net.	172800	IN	A	192.26.92.30
+c.gtld-servers.net.	172800	IN	AAAA	2001:503:83eb::30
+e.gtld-servers.net.	172800	IN	A	192.12.94.30
+e.gtld-servers.net.	172800	IN	AAAA	2001:502:1ca1::30
 
-;; SERVER: 192.36.148.17
+;; SERVER: 198.41.0.4
 ; <<>> recursive <<>> @192.5.6.30 A console.cname-proxy.amazon.com.
-;; opcode: QUERY, status: NOERROR, id: 38021
+;; opcode: QUERY, status: NOERROR, id: 65371
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 8, ADDITIONAL: 5
 
 ;; OPT PSEUDOSECTION:
@@ -384,7 +380,7 @@ ns2.amzndns.com.	172800	IN	AAAA	2610:a1:1016::10
 
 ;; SERVER: 192.5.6.30
 ; <<>> recursive <<>> @156.154.64.10 A console.cname-proxy.amazon.com.
-;; opcode: QUERY, status: NOERROR, id: 11028
+;; opcode: QUERY, status: NOERROR, id: 42796
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 4, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
@@ -400,42 +396,41 @@ cname-proxy.amazon.com.	60	IN	NS	ns-1313.awsdns-36.org.
 cname-proxy.amazon.com.	60	IN	NS	ns-1878.awsdns-42.co.uk.
 
 ;; SERVER: 156.154.64.10
-; <<>> recursive <<>> @192.36.148.17 A ns-1313.awsdns-36.org.
-;; opcode: QUERY, status: NOERROR, id: 55986
+; <<>> recursive <<>> @198.41.0.4 A ns-1313.awsdns-36.org.
+;; opcode: QUERY, status: NOERROR, id: 17379
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 6, ADDITIONAL: 13
 
 ;; OPT PSEUDOSECTION:
-; EDNS: version 0; flags:; udp: 1232
-; COOKIE: f491522e48b09f1a0100000068c4028b43e1d1374611b246
+; EDNS: version 0; flags:; udp: 4096
 
 ;; QUESTION SECTION:
 ;ns-1313.awsdns-36.org.	IN	 A
 
 ;; AUTHORITY SECTION:
 org.	172800	IN	NS	a2.org.afilias-nst.info.
-org.	172800	IN	NS	d0.org.afilias-nst.org.
 org.	172800	IN	NS	b2.org.afilias-nst.org.
-org.	172800	IN	NS	c0.org.afilias-nst.info.
+org.	172800	IN	NS	d0.org.afilias-nst.org.
 org.	172800	IN	NS	a0.org.afilias-nst.info.
 org.	172800	IN	NS	b0.org.afilias-nst.org.
+org.	172800	IN	NS	c0.org.afilias-nst.info.
 
 ;; ADDITIONAL SECTION:
-d0.org.afilias-nst.org.	172800	IN	A	199.19.57.1
-c0.org.afilias-nst.info.	172800	IN	A	199.19.53.1
-b2.org.afilias-nst.org.	172800	IN	A	199.249.120.1
-b0.org.afilias-nst.org.	172800	IN	A	199.19.54.1
 a2.org.afilias-nst.info.	172800	IN	A	199.249.112.1
-a0.org.afilias-nst.info.	172800	IN	A	199.19.56.1
-d0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:f::1
-c0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:b::1
-b2.org.afilias-nst.org.	172800	IN	AAAA	2001:500:48::1
-b0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:c::1
 a2.org.afilias-nst.info.	172800	IN	AAAA	2001:500:40::1
+b2.org.afilias-nst.org.	172800	IN	A	199.249.120.1
+b2.org.afilias-nst.org.	172800	IN	AAAA	2001:500:48::1
+d0.org.afilias-nst.org.	172800	IN	A	199.19.57.1
+d0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:f::1
+a0.org.afilias-nst.info.	172800	IN	A	199.19.56.1
 a0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:e::1
+b0.org.afilias-nst.org.	172800	IN	A	199.19.54.1
+b0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:c::1
+c0.org.afilias-nst.info.	172800	IN	A	199.19.53.1
+c0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:b::1
 
-;; SERVER: 192.36.148.17
+;; SERVER: 198.41.0.4
 ; <<>> recursive <<>> @199.19.53.1 A ns-1313.awsdns-36.org.
-;; opcode: QUERY, status: NOERROR, id: 54856
+;; opcode: QUERY, status: NOERROR, id: 55085
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 4, ADDITIONAL: 9
 
 ;; OPT PSEUDOSECTION:
@@ -446,9 +441,9 @@ a0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:e::1
 
 ;; AUTHORITY SECTION:
 awsdns-36.org.	3600	IN	NS	g-ns-1636.awsdns-36.org.
+awsdns-36.org.	3600	IN	NS	g-ns-164.awsdns-36.org.
 awsdns-36.org.	3600	IN	NS	g-ns-1063.awsdns-36.org.
 awsdns-36.org.	3600	IN	NS	g-ns-742.awsdns-36.org.
-awsdns-36.org.	3600	IN	NS	g-ns-164.awsdns-36.org.
 
 ;; ADDITIONAL SECTION:
 g-ns-164.awsdns-36.org.	3600	IN	A	205.251.192.164
@@ -462,7 +457,7 @@ g-ns-1636.awsdns-36.org.	3600	IN	AAAA	2600:9000:5306:6400::1
 
 ;; SERVER: 199.19.53.1
 ; <<>> recursive <<>> @205.251.192.164 A ns-1313.awsdns-36.org.
-;; opcode: QUERY, status: NOERROR, id: 45397
+;; opcode: QUERY, status: NOERROR, id: 22478
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 9
 
 ;; OPT PSEUDOSECTION:
@@ -492,7 +487,7 @@ g-ns-742.awsdns-36.org.	172800	IN	AAAA	2600:9000:5302:e600::1
 
 ;; SERVER: 205.251.192.164
 ; <<>> recursive <<>> @205.251.192.164 A ns-1313.awsdns-36.org.
-;; opcode: QUERY, status: NOERROR, id: 31115
+;; opcode: QUERY, status: NOERROR, id: 51515
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 9
 
 ;; OPT PSEUDOSECTION:
@@ -522,7 +517,7 @@ g-ns-742.awsdns-36.org.	172800	IN	AAAA	2600:9000:5302:e600::1
 
 ;; SERVER: 205.251.192.164
 ; <<>> recursive <<>> @205.251.192.164 A ns-1313.awsdns-36.org.
-;; opcode: QUERY, status: NOERROR, id: 64519
+;; opcode: QUERY, status: NOERROR, id: 64626
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 9
 
 ;; OPT PSEUDOSECTION:
@@ -552,7 +547,7 @@ g-ns-742.awsdns-36.org.	172800	IN	AAAA	2600:9000:5302:e600::1
 
 ;; SERVER: 205.251.192.164
 ; <<>> recursive <<>> @205.251.197.33 A console.cname-proxy.amazon.com.
-;; opcode: QUERY, status: NOERROR, id: 19749
+;; opcode: QUERY, status: NOERROR, id: 15510
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
@@ -571,63 +566,62 @@ cname-proxy.amazon.com.	1801	IN	NS	ns-429.awsdns-53.com.
 cname-proxy.amazon.com.	1801	IN	NS	ns-689.awsdns-22.net.
 
 ;; SERVER: 205.251.197.33
-; <<>> recursive <<>> @192.36.148.17 A lbr.us.console.amazonaws.com.
-;; opcode: QUERY, status: NOERROR, id: 49260
+; <<>> recursive <<>> @198.41.0.4 A lbr.us.console.amazonaws.com.
+;; opcode: QUERY, status: NOERROR, id: 285
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 13, ADDITIONAL: 27
 
 ;; OPT PSEUDOSECTION:
-; EDNS: version 0; flags:; udp: 1232
-; COOKIE: f491522e48b09f1a0100000068c4028b43e1d1374611b246
+; EDNS: version 0; flags:; udp: 4096
 
 ;; QUESTION SECTION:
 ;lbr.us.console.amazonaws.com.	IN	 A
 
 ;; AUTHORITY SECTION:
-com.	172800	IN	NS	d.gtld-servers.net.
-com.	172800	IN	NS	e.gtld-servers.net.
-com.	172800	IN	NS	i.gtld-servers.net.
-com.	172800	IN	NS	c.gtld-servers.net.
-com.	172800	IN	NS	b.gtld-servers.net.
-com.	172800	IN	NS	a.gtld-servers.net.
-com.	172800	IN	NS	m.gtld-servers.net.
-com.	172800	IN	NS	k.gtld-servers.net.
-com.	172800	IN	NS	f.gtld-servers.net.
-com.	172800	IN	NS	g.gtld-servers.net.
-com.	172800	IN	NS	h.gtld-servers.net.
-com.	172800	IN	NS	j.gtld-servers.net.
 com.	172800	IN	NS	l.gtld-servers.net.
+com.	172800	IN	NS	j.gtld-servers.net.
+com.	172800	IN	NS	h.gtld-servers.net.
+com.	172800	IN	NS	d.gtld-servers.net.
+com.	172800	IN	NS	b.gtld-servers.net.
+com.	172800	IN	NS	f.gtld-servers.net.
+com.	172800	IN	NS	k.gtld-servers.net.
+com.	172800	IN	NS	m.gtld-servers.net.
+com.	172800	IN	NS	i.gtld-servers.net.
+com.	172800	IN	NS	g.gtld-servers.net.
+com.	172800	IN	NS	a.gtld-servers.net.
+com.	172800	IN	NS	c.gtld-servers.net.
+com.	172800	IN	NS	e.gtld-servers.net.
 
 ;; ADDITIONAL SECTION:
-m.gtld-servers.net.	172800	IN	A	192.55.83.30
 l.gtld-servers.net.	172800	IN	A	192.41.162.30
-k.gtld-servers.net.	172800	IN	A	192.52.178.30
-j.gtld-servers.net.	172800	IN	A	192.48.79.30
-i.gtld-servers.net.	172800	IN	A	192.43.172.30
-h.gtld-servers.net.	172800	IN	A	192.54.112.30
-g.gtld-servers.net.	172800	IN	A	192.42.93.30
-f.gtld-servers.net.	172800	IN	A	192.35.51.30
-e.gtld-servers.net.	172800	IN	A	192.12.94.30
-d.gtld-servers.net.	172800	IN	A	192.31.80.30
-c.gtld-servers.net.	172800	IN	A	192.26.92.30
-b.gtld-servers.net.	172800	IN	A	192.33.14.30
-a.gtld-servers.net.	172800	IN	A	192.5.6.30
-m.gtld-servers.net.	172800	IN	AAAA	2001:501:b1f9::30
 l.gtld-servers.net.	172800	IN	AAAA	2001:500:d937::30
-k.gtld-servers.net.	172800	IN	AAAA	2001:503:d2d::30
+j.gtld-servers.net.	172800	IN	A	192.48.79.30
 j.gtld-servers.net.	172800	IN	AAAA	2001:502:7094::30
-i.gtld-servers.net.	172800	IN	AAAA	2001:503:39c1::30
+h.gtld-servers.net.	172800	IN	A	192.54.112.30
 h.gtld-servers.net.	172800	IN	AAAA	2001:502:8cc::30
-g.gtld-servers.net.	172800	IN	AAAA	2001:503:eea3::30
-f.gtld-servers.net.	172800	IN	AAAA	2001:503:d414::30
-e.gtld-servers.net.	172800	IN	AAAA	2001:502:1ca1::30
+d.gtld-servers.net.	172800	IN	A	192.31.80.30
 d.gtld-servers.net.	172800	IN	AAAA	2001:500:856e::30
-c.gtld-servers.net.	172800	IN	AAAA	2001:503:83eb::30
+b.gtld-servers.net.	172800	IN	A	192.33.14.30
 b.gtld-servers.net.	172800	IN	AAAA	2001:503:231d::2:30
+f.gtld-servers.net.	172800	IN	A	192.35.51.30
+f.gtld-servers.net.	172800	IN	AAAA	2001:503:d414::30
+k.gtld-servers.net.	172800	IN	A	192.52.178.30
+k.gtld-servers.net.	172800	IN	AAAA	2001:503:d2d::30
+m.gtld-servers.net.	172800	IN	A	192.55.83.30
+m.gtld-servers.net.	172800	IN	AAAA	2001:501:b1f9::30
+i.gtld-servers.net.	172800	IN	A	192.43.172.30
+i.gtld-servers.net.	172800	IN	AAAA	2001:503:39c1::30
+g.gtld-servers.net.	172800	IN	A	192.42.93.30
+g.gtld-servers.net.	172800	IN	AAAA	2001:503:eea3::30
+a.gtld-servers.net.	172800	IN	A	192.5.6.30
 a.gtld-servers.net.	172800	IN	AAAA	2001:503:a83e::2:30
+c.gtld-servers.net.	172800	IN	A	192.26.92.30
+c.gtld-servers.net.	172800	IN	AAAA	2001:503:83eb::30
+e.gtld-servers.net.	172800	IN	A	192.12.94.30
+e.gtld-servers.net.	172800	IN	AAAA	2001:502:1ca1::30
 
-;; SERVER: 192.36.148.17
+;; SERVER: 198.41.0.4
 ; <<>> recursive <<>> @192.5.6.30 A lbr.us.console.amazonaws.com.
-;; opcode: QUERY, status: NOERROR, id: 25118
+;; opcode: QUERY, status: NOERROR, id: 46956
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 4, ADDITIONAL: 2
 
 ;; OPT PSEUDOSECTION:
@@ -647,7 +641,7 @@ ns-27.awsdns-03.com.	172800	IN	A	205.251.192.27
 
 ;; SERVER: 192.5.6.30
 ; <<>> recursive <<>> @205.251.192.27 A lbr.us.console.amazonaws.com.
-;; opcode: QUERY, status: NOERROR, id: 15375
+;; opcode: QUERY, status: NOERROR, id: 45691
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 4, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
@@ -663,42 +657,41 @@ console.amazonaws.com.	7200	IN	NS	ns-372.awsdns-46.com.
 console.amazonaws.com.	7200	IN	NS	ns-671.awsdns-19.net.
 
 ;; SERVER: 205.251.192.27
-; <<>> recursive <<>> @192.36.148.17 A ns-1342.awsdns-39.org.
-;; opcode: QUERY, status: NOERROR, id: 12412
+; <<>> recursive <<>> @198.41.0.4 A ns-1342.awsdns-39.org.
+;; opcode: QUERY, status: NOERROR, id: 20893
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 6, ADDITIONAL: 13
 
 ;; OPT PSEUDOSECTION:
-; EDNS: version 0; flags:; udp: 1232
-; COOKIE: f491522e48b09f1a0100000068c4028b43e1d1374611b246
+; EDNS: version 0; flags:; udp: 4096
 
 ;; QUESTION SECTION:
 ;ns-1342.awsdns-39.org.	IN	 A
 
 ;; AUTHORITY SECTION:
-org.	172800	IN	NS	a0.org.afilias-nst.info.
 org.	172800	IN	NS	a2.org.afilias-nst.info.
-org.	172800	IN	NS	c0.org.afilias-nst.info.
 org.	172800	IN	NS	b2.org.afilias-nst.org.
-org.	172800	IN	NS	b0.org.afilias-nst.org.
 org.	172800	IN	NS	d0.org.afilias-nst.org.
+org.	172800	IN	NS	a0.org.afilias-nst.info.
+org.	172800	IN	NS	b0.org.afilias-nst.org.
+org.	172800	IN	NS	c0.org.afilias-nst.info.
 
 ;; ADDITIONAL SECTION:
-d0.org.afilias-nst.org.	172800	IN	A	199.19.57.1
-c0.org.afilias-nst.info.	172800	IN	A	199.19.53.1
-b2.org.afilias-nst.org.	172800	IN	A	199.249.120.1
-b0.org.afilias-nst.org.	172800	IN	A	199.19.54.1
 a2.org.afilias-nst.info.	172800	IN	A	199.249.112.1
-a0.org.afilias-nst.info.	172800	IN	A	199.19.56.1
-d0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:f::1
-c0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:b::1
-b2.org.afilias-nst.org.	172800	IN	AAAA	2001:500:48::1
-b0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:c::1
 a2.org.afilias-nst.info.	172800	IN	AAAA	2001:500:40::1
+b2.org.afilias-nst.org.	172800	IN	A	199.249.120.1
+b2.org.afilias-nst.org.	172800	IN	AAAA	2001:500:48::1
+d0.org.afilias-nst.org.	172800	IN	A	199.19.57.1
+d0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:f::1
+a0.org.afilias-nst.info.	172800	IN	A	199.19.56.1
 a0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:e::1
+b0.org.afilias-nst.org.	172800	IN	A	199.19.54.1
+b0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:c::1
+c0.org.afilias-nst.info.	172800	IN	A	199.19.53.1
+c0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:b::1
 
-;; SERVER: 192.36.148.17
+;; SERVER: 198.41.0.4
 ; <<>> recursive <<>> @199.19.53.1 A ns-1342.awsdns-39.org.
-;; opcode: QUERY, status: NOERROR, id: 9994
+;; opcode: QUERY, status: NOERROR, id: 32605
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 4, ADDITIONAL: 9
 
 ;; OPT PSEUDOSECTION:
@@ -708,10 +701,10 @@ a0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:e::1
 ;ns-1342.awsdns-39.org.	IN	 A
 
 ;; AUTHORITY SECTION:
+awsdns-39.org.	3600	IN	NS	g-ns-745.awsdns-39.org.
+awsdns-39.org.	3600	IN	NS	g-ns-1066.awsdns-39.org.
 awsdns-39.org.	3600	IN	NS	g-ns-1639.awsdns-39.org.
 awsdns-39.org.	3600	IN	NS	g-ns-167.awsdns-39.org.
-awsdns-39.org.	3600	IN	NS	g-ns-1066.awsdns-39.org.
-awsdns-39.org.	3600	IN	NS	g-ns-745.awsdns-39.org.
 
 ;; ADDITIONAL SECTION:
 g-ns-167.awsdns-39.org.	3600	IN	A	205.251.192.167
@@ -725,7 +718,7 @@ g-ns-1639.awsdns-39.org.	3600	IN	AAAA	2600:9000:5306:6700::1
 
 ;; SERVER: 199.19.53.1
 ; <<>> recursive <<>> @205.251.192.167 A ns-1342.awsdns-39.org.
-;; opcode: QUERY, status: NOERROR, id: 51429
+;; opcode: QUERY, status: NOERROR, id: 12733
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 9
 
 ;; OPT PSEUDOSECTION:
@@ -755,7 +748,7 @@ g-ns-745.awsdns-39.org.	172800	IN	AAAA	2600:9000:5302:e900::1
 
 ;; SERVER: 205.251.192.167
 ; <<>> recursive <<>> @205.251.192.167 A ns-1342.awsdns-39.org.
-;; opcode: QUERY, status: NOERROR, id: 4118
+;; opcode: QUERY, status: NOERROR, id: 22240
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 9
 
 ;; OPT PSEUDOSECTION:
@@ -785,7 +778,7 @@ g-ns-745.awsdns-39.org.	172800	IN	AAAA	2600:9000:5302:e900::1
 
 ;; SERVER: 205.251.192.167
 ; <<>> recursive <<>> @205.251.192.167 A ns-1342.awsdns-39.org.
-;; opcode: QUERY, status: NOERROR, id: 48480
+;; opcode: QUERY, status: NOERROR, id: 55811
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 9
 
 ;; OPT PSEUDOSECTION:
@@ -815,7 +808,7 @@ g-ns-745.awsdns-39.org.	172800	IN	AAAA	2600:9000:5302:e900::1
 
 ;; SERVER: 205.251.192.167
 ; <<>> recursive <<>> @205.251.197.62 A lbr.us.console.amazonaws.com.
-;; opcode: QUERY, status: NOERROR, id: 41573
+;; opcode: QUERY, status: NOERROR, id: 28993
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 4, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
@@ -831,42 +824,41 @@ us.console.amazonaws.com.	60	IN	NS	ns-499.awsdns-62.com.
 us.console.amazonaws.com.	60	IN	NS	ns-611.awsdns-12.net.
 
 ;; SERVER: 205.251.197.62
-; <<>> recursive <<>> @192.36.148.17 A ns-1335.awsdns-38.org.
-;; opcode: QUERY, status: NOERROR, id: 32950
+; <<>> recursive <<>> @198.41.0.4 A ns-1335.awsdns-38.org.
+;; opcode: QUERY, status: NOERROR, id: 61487
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 6, ADDITIONAL: 13
 
 ;; OPT PSEUDOSECTION:
-; EDNS: version 0; flags:; udp: 1232
-; COOKIE: f491522e48b09f1a0100000068c4028c9dcbd37cffce6c5c
+; EDNS: version 0; flags:; udp: 4096
 
 ;; QUESTION SECTION:
 ;ns-1335.awsdns-38.org.	IN	 A
 
 ;; AUTHORITY SECTION:
-org.	172800	IN	NS	d0.org.afilias-nst.org.
-org.	172800	IN	NS	b0.org.afilias-nst.org.
-org.	172800	IN	NS	a0.org.afilias-nst.info.
 org.	172800	IN	NS	a2.org.afilias-nst.info.
 org.	172800	IN	NS	b2.org.afilias-nst.org.
+org.	172800	IN	NS	d0.org.afilias-nst.org.
+org.	172800	IN	NS	a0.org.afilias-nst.info.
+org.	172800	IN	NS	b0.org.afilias-nst.org.
 org.	172800	IN	NS	c0.org.afilias-nst.info.
 
 ;; ADDITIONAL SECTION:
-d0.org.afilias-nst.org.	172800	IN	A	199.19.57.1
-c0.org.afilias-nst.info.	172800	IN	A	199.19.53.1
-b2.org.afilias-nst.org.	172800	IN	A	199.249.120.1
-b0.org.afilias-nst.org.	172800	IN	A	199.19.54.1
 a2.org.afilias-nst.info.	172800	IN	A	199.249.112.1
-a0.org.afilias-nst.info.	172800	IN	A	199.19.56.1
-d0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:f::1
-c0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:b::1
-b2.org.afilias-nst.org.	172800	IN	AAAA	2001:500:48::1
-b0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:c::1
 a2.org.afilias-nst.info.	172800	IN	AAAA	2001:500:40::1
+b2.org.afilias-nst.org.	172800	IN	A	199.249.120.1
+b2.org.afilias-nst.org.	172800	IN	AAAA	2001:500:48::1
+d0.org.afilias-nst.org.	172800	IN	A	199.19.57.1
+d0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:f::1
+a0.org.afilias-nst.info.	172800	IN	A	199.19.56.1
 a0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:e::1
+b0.org.afilias-nst.org.	172800	IN	A	199.19.54.1
+b0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:c::1
+c0.org.afilias-nst.info.	172800	IN	A	199.19.53.1
+c0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:b::1
 
-;; SERVER: 192.36.148.17
+;; SERVER: 198.41.0.4
 ; <<>> recursive <<>> @199.19.53.1 A ns-1335.awsdns-38.org.
-;; opcode: QUERY, status: NOERROR, id: 26609
+;; opcode: QUERY, status: NOERROR, id: 49934
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 4, ADDITIONAL: 9
 
 ;; OPT PSEUDOSECTION:
@@ -877,9 +869,9 @@ a0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:e::1
 
 ;; AUTHORITY SECTION:
 awsdns-38.org.	3600	IN	NS	g-ns-744.awsdns-38.org.
+awsdns-38.org.	3600	IN	NS	g-ns-166.awsdns-38.org.
 awsdns-38.org.	3600	IN	NS	g-ns-1065.awsdns-38.org.
 awsdns-38.org.	3600	IN	NS	g-ns-1638.awsdns-38.org.
-awsdns-38.org.	3600	IN	NS	g-ns-166.awsdns-38.org.
 
 ;; ADDITIONAL SECTION:
 g-ns-166.awsdns-38.org.	3600	IN	A	205.251.192.166
@@ -893,7 +885,7 @@ g-ns-1638.awsdns-38.org.	3600	IN	AAAA	2600:9000:5306:6600::1
 
 ;; SERVER: 199.19.53.1
 ; <<>> recursive <<>> @205.251.192.166 A ns-1335.awsdns-38.org.
-;; opcode: QUERY, status: NOERROR, id: 4375
+;; opcode: QUERY, status: NOERROR, id: 37967
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 9
 
 ;; OPT PSEUDOSECTION:
@@ -923,7 +915,7 @@ g-ns-744.awsdns-38.org.	172800	IN	AAAA	2600:9000:5302:e800::1
 
 ;; SERVER: 205.251.192.166
 ; <<>> recursive <<>> @205.251.192.166 A ns-1335.awsdns-38.org.
-;; opcode: QUERY, status: NOERROR, id: 41711
+;; opcode: QUERY, status: NOERROR, id: 21092
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 9
 
 ;; OPT PSEUDOSECTION:
@@ -953,7 +945,7 @@ g-ns-744.awsdns-38.org.	172800	IN	AAAA	2600:9000:5302:e800::1
 
 ;; SERVER: 205.251.192.166
 ; <<>> recursive <<>> @205.251.192.166 A ns-1335.awsdns-38.org.
-;; opcode: QUERY, status: NOERROR, id: 27595
+;; opcode: QUERY, status: NOERROR, id: 54104
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 9
 
 ;; OPT PSEUDOSECTION:
@@ -983,7 +975,7 @@ g-ns-744.awsdns-38.org.	172800	IN	AAAA	2600:9000:5302:e800::1
 
 ;; SERVER: 205.251.192.166
 ; <<>> recursive <<>> @205.251.197.55 A lbr.us.console.amazonaws.com.
-;; opcode: QUERY, status: NOERROR, id: 52027
+;; opcode: QUERY, status: NOERROR, id: 3086
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
@@ -1002,63 +994,62 @@ us.console.amazonaws.com.	172800	IN	NS	ns-499.awsdns-62.com.
 us.console.amazonaws.com.	172800	IN	NS	ns-611.awsdns-12.net.
 
 ;; SERVER: 205.251.197.55
-; <<>> recursive <<>> @192.36.148.17 A eu-north-1.console.aws.amazon.com.
-;; opcode: QUERY, status: NOERROR, id: 47131
+; <<>> recursive <<>> @198.41.0.4 A eu-north-1.console.aws.amazon.com.
+;; opcode: QUERY, status: NOERROR, id: 41599
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 13, ADDITIONAL: 27
 
 ;; OPT PSEUDOSECTION:
-; EDNS: version 0; flags:; udp: 1232
-; COOKIE: f491522e48b09f1a0100000068c4028c9dcbd37cffce6c5c
+; EDNS: version 0; flags:; udp: 4096
 
 ;; QUESTION SECTION:
 ;eu-north-1.console.aws.amazon.com.	IN	 A
 
 ;; AUTHORITY SECTION:
 com.	172800	IN	NS	l.gtld-servers.net.
-com.	172800	IN	NS	i.gtld-servers.net.
 com.	172800	IN	NS	j.gtld-servers.net.
-com.	172800	IN	NS	g.gtld-servers.net.
-com.	172800	IN	NS	b.gtld-servers.net.
-com.	172800	IN	NS	e.gtld-servers.net.
-com.	172800	IN	NS	c.gtld-servers.net.
-com.	172800	IN	NS	f.gtld-servers.net.
-com.	172800	IN	NS	a.gtld-servers.net.
-com.	172800	IN	NS	m.gtld-servers.net.
 com.	172800	IN	NS	h.gtld-servers.net.
 com.	172800	IN	NS	d.gtld-servers.net.
+com.	172800	IN	NS	b.gtld-servers.net.
+com.	172800	IN	NS	f.gtld-servers.net.
 com.	172800	IN	NS	k.gtld-servers.net.
+com.	172800	IN	NS	m.gtld-servers.net.
+com.	172800	IN	NS	i.gtld-servers.net.
+com.	172800	IN	NS	g.gtld-servers.net.
+com.	172800	IN	NS	a.gtld-servers.net.
+com.	172800	IN	NS	c.gtld-servers.net.
+com.	172800	IN	NS	e.gtld-servers.net.
 
 ;; ADDITIONAL SECTION:
-m.gtld-servers.net.	172800	IN	A	192.55.83.30
 l.gtld-servers.net.	172800	IN	A	192.41.162.30
-k.gtld-servers.net.	172800	IN	A	192.52.178.30
-j.gtld-servers.net.	172800	IN	A	192.48.79.30
-i.gtld-servers.net.	172800	IN	A	192.43.172.30
-h.gtld-servers.net.	172800	IN	A	192.54.112.30
-g.gtld-servers.net.	172800	IN	A	192.42.93.30
-f.gtld-servers.net.	172800	IN	A	192.35.51.30
-e.gtld-servers.net.	172800	IN	A	192.12.94.30
-d.gtld-servers.net.	172800	IN	A	192.31.80.30
-c.gtld-servers.net.	172800	IN	A	192.26.92.30
-b.gtld-servers.net.	172800	IN	A	192.33.14.30
-a.gtld-servers.net.	172800	IN	A	192.5.6.30
-m.gtld-servers.net.	172800	IN	AAAA	2001:501:b1f9::30
 l.gtld-servers.net.	172800	IN	AAAA	2001:500:d937::30
-k.gtld-servers.net.	172800	IN	AAAA	2001:503:d2d::30
+j.gtld-servers.net.	172800	IN	A	192.48.79.30
 j.gtld-servers.net.	172800	IN	AAAA	2001:502:7094::30
-i.gtld-servers.net.	172800	IN	AAAA	2001:503:39c1::30
+h.gtld-servers.net.	172800	IN	A	192.54.112.30
 h.gtld-servers.net.	172800	IN	AAAA	2001:502:8cc::30
-g.gtld-servers.net.	172800	IN	AAAA	2001:503:eea3::30
-f.gtld-servers.net.	172800	IN	AAAA	2001:503:d414::30
-e.gtld-servers.net.	172800	IN	AAAA	2001:502:1ca1::30
+d.gtld-servers.net.	172800	IN	A	192.31.80.30
 d.gtld-servers.net.	172800	IN	AAAA	2001:500:856e::30
-c.gtld-servers.net.	172800	IN	AAAA	2001:503:83eb::30
+b.gtld-servers.net.	172800	IN	A	192.33.14.30
 b.gtld-servers.net.	172800	IN	AAAA	2001:503:231d::2:30
+f.gtld-servers.net.	172800	IN	A	192.35.51.30
+f.gtld-servers.net.	172800	IN	AAAA	2001:503:d414::30
+k.gtld-servers.net.	172800	IN	A	192.52.178.30
+k.gtld-servers.net.	172800	IN	AAAA	2001:503:d2d::30
+m.gtld-servers.net.	172800	IN	A	192.55.83.30
+m.gtld-servers.net.	172800	IN	AAAA	2001:501:b1f9::30
+i.gtld-servers.net.	172800	IN	A	192.43.172.30
+i.gtld-servers.net.	172800	IN	AAAA	2001:503:39c1::30
+g.gtld-servers.net.	172800	IN	A	192.42.93.30
+g.gtld-servers.net.	172800	IN	AAAA	2001:503:eea3::30
+a.gtld-servers.net.	172800	IN	A	192.5.6.30
 a.gtld-servers.net.	172800	IN	AAAA	2001:503:a83e::2:30
+c.gtld-servers.net.	172800	IN	A	192.26.92.30
+c.gtld-servers.net.	172800	IN	AAAA	2001:503:83eb::30
+e.gtld-servers.net.	172800	IN	A	192.12.94.30
+e.gtld-servers.net.	172800	IN	AAAA	2001:502:1ca1::30
 
-;; SERVER: 192.36.148.17
+;; SERVER: 198.41.0.4
 ; <<>> recursive <<>> @192.5.6.30 A eu-north-1.console.aws.amazon.com.
-;; opcode: QUERY, status: NOERROR, id: 1637
+;; opcode: QUERY, status: NOERROR, id: 63264
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 8, ADDITIONAL: 5
 
 ;; OPT PSEUDOSECTION:
@@ -1085,7 +1076,7 @@ ns2.amzndns.com.	172800	IN	AAAA	2610:a1:1016::10
 
 ;; SERVER: 192.5.6.30
 ; <<>> recursive <<>> @156.154.64.10 A eu-north-1.console.aws.amazon.com.
-;; opcode: QUERY, status: NOERROR, id: 4064
+;; opcode: QUERY, status: NOERROR, id: 24387
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
@@ -1098,69 +1089,68 @@ ns2.amzndns.com.	172800	IN	AAAA	2610:a1:1016::10
 eu-north-1.console.aws.amazon.com.	7200	IN	CNAME	eu-north-1.console.cname-proxy.amazon.com.
 
 ;; AUTHORITY SECTION:
-cname-proxy.amazon.com.	60	IN	NS	ns-429.awsdns-53.com.
-cname-proxy.amazon.com.	60	IN	NS	ns-689.awsdns-22.net.
 cname-proxy.amazon.com.	60	IN	NS	ns-1313.awsdns-36.org.
 cname-proxy.amazon.com.	60	IN	NS	ns-1878.awsdns-42.co.uk.
+cname-proxy.amazon.com.	60	IN	NS	ns-429.awsdns-53.com.
+cname-proxy.amazon.com.	60	IN	NS	ns-689.awsdns-22.net.
 
 ;; SERVER: 156.154.64.10
-; <<>> recursive <<>> @192.36.148.17 A eu-north-1.console.cname-proxy.amazon.com.
-;; opcode: QUERY, status: NOERROR, id: 1660
+; <<>> recursive <<>> @198.41.0.4 A eu-north-1.console.cname-proxy.amazon.com.
+;; opcode: QUERY, status: NOERROR, id: 38259
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 13, ADDITIONAL: 27
 
 ;; OPT PSEUDOSECTION:
-; EDNS: version 0; flags:; udp: 1232
-; COOKIE: f491522e48b09f1a0100000068c4028c9dcbd37cffce6c5c
+; EDNS: version 0; flags:; udp: 4096
 
 ;; QUESTION SECTION:
 ;eu-north-1.console.cname-proxy.amazon.com.	IN	 A
 
 ;; AUTHORITY SECTION:
-com.	172800	IN	NS	e.gtld-servers.net.
-com.	172800	IN	NS	k.gtld-servers.net.
-com.	172800	IN	NS	h.gtld-servers.net.
-com.	172800	IN	NS	b.gtld-servers.net.
-com.	172800	IN	NS	c.gtld-servers.net.
-com.	172800	IN	NS	d.gtld-servers.net.
-com.	172800	IN	NS	m.gtld-servers.net.
-com.	172800	IN	NS	f.gtld-servers.net.
-com.	172800	IN	NS	a.gtld-servers.net.
-com.	172800	IN	NS	i.gtld-servers.net.
-com.	172800	IN	NS	j.gtld-servers.net.
-com.	172800	IN	NS	g.gtld-servers.net.
 com.	172800	IN	NS	l.gtld-servers.net.
+com.	172800	IN	NS	j.gtld-servers.net.
+com.	172800	IN	NS	h.gtld-servers.net.
+com.	172800	IN	NS	d.gtld-servers.net.
+com.	172800	IN	NS	b.gtld-servers.net.
+com.	172800	IN	NS	f.gtld-servers.net.
+com.	172800	IN	NS	k.gtld-servers.net.
+com.	172800	IN	NS	m.gtld-servers.net.
+com.	172800	IN	NS	i.gtld-servers.net.
+com.	172800	IN	NS	g.gtld-servers.net.
+com.	172800	IN	NS	a.gtld-servers.net.
+com.	172800	IN	NS	c.gtld-servers.net.
+com.	172800	IN	NS	e.gtld-servers.net.
 
 ;; ADDITIONAL SECTION:
-m.gtld-servers.net.	172800	IN	A	192.55.83.30
 l.gtld-servers.net.	172800	IN	A	192.41.162.30
-k.gtld-servers.net.	172800	IN	A	192.52.178.30
-j.gtld-servers.net.	172800	IN	A	192.48.79.30
-i.gtld-servers.net.	172800	IN	A	192.43.172.30
-h.gtld-servers.net.	172800	IN	A	192.54.112.30
-g.gtld-servers.net.	172800	IN	A	192.42.93.30
-f.gtld-servers.net.	172800	IN	A	192.35.51.30
-e.gtld-servers.net.	172800	IN	A	192.12.94.30
-d.gtld-servers.net.	172800	IN	A	192.31.80.30
-c.gtld-servers.net.	172800	IN	A	192.26.92.30
-b.gtld-servers.net.	172800	IN	A	192.33.14.30
-a.gtld-servers.net.	172800	IN	A	192.5.6.30
-m.gtld-servers.net.	172800	IN	AAAA	2001:501:b1f9::30
 l.gtld-servers.net.	172800	IN	AAAA	2001:500:d937::30
-k.gtld-servers.net.	172800	IN	AAAA	2001:503:d2d::30
+j.gtld-servers.net.	172800	IN	A	192.48.79.30
 j.gtld-servers.net.	172800	IN	AAAA	2001:502:7094::30
-i.gtld-servers.net.	172800	IN	AAAA	2001:503:39c1::30
+h.gtld-servers.net.	172800	IN	A	192.54.112.30
 h.gtld-servers.net.	172800	IN	AAAA	2001:502:8cc::30
-g.gtld-servers.net.	172800	IN	AAAA	2001:503:eea3::30
-f.gtld-servers.net.	172800	IN	AAAA	2001:503:d414::30
-e.gtld-servers.net.	172800	IN	AAAA	2001:502:1ca1::30
+d.gtld-servers.net.	172800	IN	A	192.31.80.30
 d.gtld-servers.net.	172800	IN	AAAA	2001:500:856e::30
-c.gtld-servers.net.	172800	IN	AAAA	2001:503:83eb::30
+b.gtld-servers.net.	172800	IN	A	192.33.14.30
 b.gtld-servers.net.	172800	IN	AAAA	2001:503:231d::2:30
+f.gtld-servers.net.	172800	IN	A	192.35.51.30
+f.gtld-servers.net.	172800	IN	AAAA	2001:503:d414::30
+k.gtld-servers.net.	172800	IN	A	192.52.178.30
+k.gtld-servers.net.	172800	IN	AAAA	2001:503:d2d::30
+m.gtld-servers.net.	172800	IN	A	192.55.83.30
+m.gtld-servers.net.	172800	IN	AAAA	2001:501:b1f9::30
+i.gtld-servers.net.	172800	IN	A	192.43.172.30
+i.gtld-servers.net.	172800	IN	AAAA	2001:503:39c1::30
+g.gtld-servers.net.	172800	IN	A	192.42.93.30
+g.gtld-servers.net.	172800	IN	AAAA	2001:503:eea3::30
+a.gtld-servers.net.	172800	IN	A	192.5.6.30
 a.gtld-servers.net.	172800	IN	AAAA	2001:503:a83e::2:30
+c.gtld-servers.net.	172800	IN	A	192.26.92.30
+c.gtld-servers.net.	172800	IN	AAAA	2001:503:83eb::30
+e.gtld-servers.net.	172800	IN	A	192.12.94.30
+e.gtld-servers.net.	172800	IN	AAAA	2001:502:1ca1::30
 
-;; SERVER: 192.36.148.17
+;; SERVER: 198.41.0.4
 ; <<>> recursive <<>> @192.5.6.30 A eu-north-1.console.cname-proxy.amazon.com.
-;; opcode: QUERY, status: NOERROR, id: 8618
+;; opcode: QUERY, status: NOERROR, id: 51327
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 8, ADDITIONAL: 5
 
 ;; OPT PSEUDOSECTION:
@@ -1187,7 +1177,7 @@ ns2.amzndns.com.	172800	IN	AAAA	2610:a1:1016::10
 
 ;; SERVER: 192.5.6.30
 ; <<>> recursive <<>> @156.154.64.10 A eu-north-1.console.cname-proxy.amazon.com.
-;; opcode: QUERY, status: NOERROR, id: 24639
+;; opcode: QUERY, status: NOERROR, id: 14621
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 4, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
@@ -1204,7 +1194,7 @@ cname-proxy.amazon.com.	60	IN	NS	ns-1878.awsdns-42.co.uk.
 
 ;; SERVER: 156.154.64.10
 ; <<>> recursive <<>> @205.251.197.33 A eu-north-1.console.cname-proxy.amazon.com.
-;; opcode: QUERY, status: NOERROR, id: 59386
+;; opcode: QUERY, status: NOERROR, id: 14324
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
@@ -1223,63 +1213,62 @@ cname-proxy.amazon.com.	1801	IN	NS	ns-429.awsdns-53.com.
 cname-proxy.amazon.com.	1801	IN	NS	ns-689.awsdns-22.net.
 
 ;; SERVER: 205.251.197.33
-; <<>> recursive <<>> @192.36.148.17 A gr.aga.console-geo.eu-north-1.amazonaws.com.
-;; opcode: QUERY, status: NOERROR, id: 47437
+; <<>> recursive <<>> @198.41.0.4 A gr.aga.console-geo.eu-north-1.amazonaws.com.
+;; opcode: QUERY, status: NOERROR, id: 57187
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 13, ADDITIONAL: 27
 
 ;; OPT PSEUDOSECTION:
-; EDNS: version 0; flags:; udp: 1232
-; COOKIE: f491522e48b09f1a0100000068c4028c9dcbd37cffce6c5c
+; EDNS: version 0; flags:; udp: 4096
 
 ;; QUESTION SECTION:
 ;gr.aga.console-geo.eu-north-1.amazonaws.com.	IN	 A
 
 ;; AUTHORITY SECTION:
-com.	172800	IN	NS	h.gtld-servers.net.
-com.	172800	IN	NS	b.gtld-servers.net.
-com.	172800	IN	NS	c.gtld-servers.net.
-com.	172800	IN	NS	a.gtld-servers.net.
-com.	172800	IN	NS	d.gtld-servers.net.
+com.	172800	IN	NS	l.gtld-servers.net.
 com.	172800	IN	NS	j.gtld-servers.net.
-com.	172800	IN	NS	i.gtld-servers.net.
-com.	172800	IN	NS	e.gtld-servers.net.
-com.	172800	IN	NS	m.gtld-servers.net.
+com.	172800	IN	NS	h.gtld-servers.net.
+com.	172800	IN	NS	d.gtld-servers.net.
+com.	172800	IN	NS	b.gtld-servers.net.
 com.	172800	IN	NS	f.gtld-servers.net.
 com.	172800	IN	NS	k.gtld-servers.net.
-com.	172800	IN	NS	l.gtld-servers.net.
+com.	172800	IN	NS	m.gtld-servers.net.
+com.	172800	IN	NS	i.gtld-servers.net.
 com.	172800	IN	NS	g.gtld-servers.net.
+com.	172800	IN	NS	a.gtld-servers.net.
+com.	172800	IN	NS	c.gtld-servers.net.
+com.	172800	IN	NS	e.gtld-servers.net.
 
 ;; ADDITIONAL SECTION:
-m.gtld-servers.net.	172800	IN	A	192.55.83.30
 l.gtld-servers.net.	172800	IN	A	192.41.162.30
-k.gtld-servers.net.	172800	IN	A	192.52.178.30
-j.gtld-servers.net.	172800	IN	A	192.48.79.30
-i.gtld-servers.net.	172800	IN	A	192.43.172.30
-h.gtld-servers.net.	172800	IN	A	192.54.112.30
-g.gtld-servers.net.	172800	IN	A	192.42.93.30
-f.gtld-servers.net.	172800	IN	A	192.35.51.30
-e.gtld-servers.net.	172800	IN	A	192.12.94.30
-d.gtld-servers.net.	172800	IN	A	192.31.80.30
-c.gtld-servers.net.	172800	IN	A	192.26.92.30
-b.gtld-servers.net.	172800	IN	A	192.33.14.30
-a.gtld-servers.net.	172800	IN	A	192.5.6.30
-m.gtld-servers.net.	172800	IN	AAAA	2001:501:b1f9::30
 l.gtld-servers.net.	172800	IN	AAAA	2001:500:d937::30
-k.gtld-servers.net.	172800	IN	AAAA	2001:503:d2d::30
+j.gtld-servers.net.	172800	IN	A	192.48.79.30
 j.gtld-servers.net.	172800	IN	AAAA	2001:502:7094::30
-i.gtld-servers.net.	172800	IN	AAAA	2001:503:39c1::30
+h.gtld-servers.net.	172800	IN	A	192.54.112.30
 h.gtld-servers.net.	172800	IN	AAAA	2001:502:8cc::30
-g.gtld-servers.net.	172800	IN	AAAA	2001:503:eea3::30
-f.gtld-servers.net.	172800	IN	AAAA	2001:503:d414::30
-e.gtld-servers.net.	172800	IN	AAAA	2001:502:1ca1::30
+d.gtld-servers.net.	172800	IN	A	192.31.80.30
 d.gtld-servers.net.	172800	IN	AAAA	2001:500:856e::30
-c.gtld-servers.net.	172800	IN	AAAA	2001:503:83eb::30
+b.gtld-servers.net.	172800	IN	A	192.33.14.30
 b.gtld-servers.net.	172800	IN	AAAA	2001:503:231d::2:30
+f.gtld-servers.net.	172800	IN	A	192.35.51.30
+f.gtld-servers.net.	172800	IN	AAAA	2001:503:d414::30
+k.gtld-servers.net.	172800	IN	A	192.52.178.30
+k.gtld-servers.net.	172800	IN	AAAA	2001:503:d2d::30
+m.gtld-servers.net.	172800	IN	A	192.55.83.30
+m.gtld-servers.net.	172800	IN	AAAA	2001:501:b1f9::30
+i.gtld-servers.net.	172800	IN	A	192.43.172.30
+i.gtld-servers.net.	172800	IN	AAAA	2001:503:39c1::30
+g.gtld-servers.net.	172800	IN	A	192.42.93.30
+g.gtld-servers.net.	172800	IN	AAAA	2001:503:eea3::30
+a.gtld-servers.net.	172800	IN	A	192.5.6.30
 a.gtld-servers.net.	172800	IN	AAAA	2001:503:a83e::2:30
+c.gtld-servers.net.	172800	IN	A	192.26.92.30
+c.gtld-servers.net.	172800	IN	AAAA	2001:503:83eb::30
+e.gtld-servers.net.	172800	IN	A	192.12.94.30
+e.gtld-servers.net.	172800	IN	AAAA	2001:502:1ca1::30
 
-;; SERVER: 192.36.148.17
+;; SERVER: 198.41.0.4
 ; <<>> recursive <<>> @192.5.6.30 A gr.aga.console-geo.eu-north-1.amazonaws.com.
-;; opcode: QUERY, status: NOERROR, id: 45894
+;; opcode: QUERY, status: NOERROR, id: 8978
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 4, ADDITIONAL: 2
 
 ;; OPT PSEUDOSECTION:
@@ -1299,7 +1288,7 @@ ns-27.awsdns-03.com.	172800	IN	A	205.251.192.27
 
 ;; SERVER: 192.5.6.30
 ; <<>> recursive <<>> @205.251.192.27 A gr.aga.console-geo.eu-north-1.amazonaws.com.
-;; opcode: QUERY, status: NOERROR, id: 36323
+;; opcode: QUERY, status: NOERROR, id: 290
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 8, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
@@ -1320,7 +1309,7 @@ eu-north-1.amazonaws.com.	7200	IN	NS	ns2.amzndns.org.
 
 ;; SERVER: 205.251.192.27
 ; <<>> recursive <<>> @156.154.64.10 A gr.aga.console-geo.eu-north-1.amazonaws.com.
-;; opcode: QUERY, status: NOERROR, id: 8271
+;; opcode: QUERY, status: NOERROR, id: 3613
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 4, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
@@ -1336,42 +1325,41 @@ console-geo.eu-north-1.amazonaws.com.	7200	IN	NS	ns-1055.awsdns-03.org.
 console-geo.eu-north-1.amazonaws.com.	7200	IN	NS	ns-1737.awsdns-25.co.uk.
 
 ;; SERVER: 156.154.64.10
-; <<>> recursive <<>> @192.36.148.17 A ns-1055.awsdns-03.org.
-;; opcode: QUERY, status: NOERROR, id: 13286
+; <<>> recursive <<>> @198.41.0.4 A ns-1055.awsdns-03.org.
+;; opcode: QUERY, status: NOERROR, id: 51902
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 6, ADDITIONAL: 13
 
 ;; OPT PSEUDOSECTION:
-; EDNS: version 0; flags:; udp: 1232
-; COOKIE: f491522e48b09f1a0100000068c4028c9dcbd37cffce6c5c
+; EDNS: version 0; flags:; udp: 4096
 
 ;; QUESTION SECTION:
 ;ns-1055.awsdns-03.org.	IN	 A
 
 ;; AUTHORITY SECTION:
+org.	172800	IN	NS	a2.org.afilias-nst.info.
 org.	172800	IN	NS	b2.org.afilias-nst.org.
-org.	172800	IN	NS	c0.org.afilias-nst.info.
+org.	172800	IN	NS	d0.org.afilias-nst.org.
 org.	172800	IN	NS	a0.org.afilias-nst.info.
 org.	172800	IN	NS	b0.org.afilias-nst.org.
-org.	172800	IN	NS	d0.org.afilias-nst.org.
-org.	172800	IN	NS	a2.org.afilias-nst.info.
+org.	172800	IN	NS	c0.org.afilias-nst.info.
 
 ;; ADDITIONAL SECTION:
-d0.org.afilias-nst.org.	172800	IN	A	199.19.57.1
-c0.org.afilias-nst.info.	172800	IN	A	199.19.53.1
-b2.org.afilias-nst.org.	172800	IN	A	199.249.120.1
-b0.org.afilias-nst.org.	172800	IN	A	199.19.54.1
 a2.org.afilias-nst.info.	172800	IN	A	199.249.112.1
-a0.org.afilias-nst.info.	172800	IN	A	199.19.56.1
-d0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:f::1
-c0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:b::1
-b2.org.afilias-nst.org.	172800	IN	AAAA	2001:500:48::1
-b0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:c::1
 a2.org.afilias-nst.info.	172800	IN	AAAA	2001:500:40::1
+b2.org.afilias-nst.org.	172800	IN	A	199.249.120.1
+b2.org.afilias-nst.org.	172800	IN	AAAA	2001:500:48::1
+d0.org.afilias-nst.org.	172800	IN	A	199.19.57.1
+d0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:f::1
+a0.org.afilias-nst.info.	172800	IN	A	199.19.56.1
 a0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:e::1
+b0.org.afilias-nst.org.	172800	IN	A	199.19.54.1
+b0.org.afilias-nst.org.	172800	IN	AAAA	2001:500:c::1
+c0.org.afilias-nst.info.	172800	IN	A	199.19.53.1
+c0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:b::1
 
-;; SERVER: 192.36.148.17
+;; SERVER: 198.41.0.4
 ; <<>> recursive <<>> @199.19.53.1 A ns-1055.awsdns-03.org.
-;; opcode: QUERY, status: NOERROR, id: 57075
+;; opcode: QUERY, status: NOERROR, id: 35342
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 4, ADDITIONAL: 9
 
 ;; OPT PSEUDOSECTION:
@@ -1381,10 +1369,10 @@ a0.org.afilias-nst.info.	172800	IN	AAAA	2001:500:e::1
 ;ns-1055.awsdns-03.org.	IN	 A
 
 ;; AUTHORITY SECTION:
-awsdns-03.org.	3600	IN	NS	g-ns-131.awsdns-03.org.
-awsdns-03.org.	3600	IN	NS	g-ns-1030.awsdns-03.org.
-awsdns-03.org.	3600	IN	NS	g-ns-1603.awsdns-03.org.
 awsdns-03.org.	3600	IN	NS	g-ns-709.awsdns-03.org.
+awsdns-03.org.	3600	IN	NS	g-ns-131.awsdns-03.org.
+awsdns-03.org.	3600	IN	NS	g-ns-1603.awsdns-03.org.
+awsdns-03.org.	3600	IN	NS	g-ns-1030.awsdns-03.org.
 
 ;; ADDITIONAL SECTION:
 g-ns-131.awsdns-03.org.	3600	IN	A	205.251.192.131
@@ -1398,7 +1386,7 @@ g-ns-1603.awsdns-03.org.	3600	IN	AAAA	2600:9000:5306:4300::1
 
 ;; SERVER: 199.19.53.1
 ; <<>> recursive <<>> @205.251.192.131 A ns-1055.awsdns-03.org.
-;; opcode: QUERY, status: NOERROR, id: 65348
+;; opcode: QUERY, status: NOERROR, id: 16003
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 9
 
 ;; OPT PSEUDOSECTION:
@@ -1428,7 +1416,7 @@ g-ns-709.awsdns-03.org.	172800	IN	AAAA	2600:9000:5302:c500::1
 
 ;; SERVER: 205.251.192.131
 ; <<>> recursive <<>> @205.251.192.131 A ns-1055.awsdns-03.org.
-;; opcode: QUERY, status: NOERROR, id: 19379
+;; opcode: QUERY, status: NOERROR, id: 5457
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 9
 
 ;; OPT PSEUDOSECTION:
@@ -1458,7 +1446,7 @@ g-ns-709.awsdns-03.org.	172800	IN	AAAA	2600:9000:5302:c500::1
 
 ;; SERVER: 205.251.192.131
 ; <<>> recursive <<>> @205.251.192.131 A ns-1055.awsdns-03.org.
-;; opcode: QUERY, status: NOERROR, id: 42296
+;; opcode: QUERY, status: NOERROR, id: 45533
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 9
 
 ;; OPT PSEUDOSECTION:
@@ -1488,7 +1476,7 @@ g-ns-709.awsdns-03.org.	172800	IN	AAAA	2600:9000:5302:c500::1
 
 ;; SERVER: 205.251.192.131
 ; <<>> recursive <<>> @205.251.196.31 A gr.aga.console-geo.eu-north-1.amazonaws.com.
-;; opcode: QUERY, status: NOERROR, id: 20833
+;; opcode: QUERY, status: NOERROR, id: 29040
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
@@ -1507,63 +1495,62 @@ console-geo.eu-north-1.amazonaws.com.	172800	IN	NS	ns-1737.awsdns-25.co.uk.
 console-geo.eu-north-1.amazonaws.com.	172800	IN	NS	ns-581.awsdns-08.net.
 
 ;; SERVER: 205.251.196.31
-; <<>> recursive <<>> @192.36.148.17 A aba8735d2c3d241de.awsglobalaccelerator.com.
-;; opcode: QUERY, status: NOERROR, id: 39742
+; <<>> recursive <<>> @198.41.0.4 A aba8735d2c3d241de.awsglobalaccelerator.com.
+;; opcode: QUERY, status: NOERROR, id: 62555
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 13, ADDITIONAL: 27
 
 ;; OPT PSEUDOSECTION:
-; EDNS: version 0; flags:; udp: 1232
-; COOKIE: f491522e48b09f1a0100000068c4028c9dcbd37cffce6c5c
+; EDNS: version 0; flags:; udp: 4096
 
 ;; QUESTION SECTION:
 ;aba8735d2c3d241de.awsglobalaccelerator.com.	IN	 A
 
 ;; AUTHORITY SECTION:
-com.	172800	IN	NS	k.gtld-servers.net.
+com.	172800	IN	NS	l.gtld-servers.net.
 com.	172800	IN	NS	j.gtld-servers.net.
-com.	172800	IN	NS	g.gtld-servers.net.
-com.	172800	IN	NS	b.gtld-servers.net.
+com.	172800	IN	NS	h.gtld-servers.net.
 com.	172800	IN	NS	d.gtld-servers.net.
+com.	172800	IN	NS	b.gtld-servers.net.
 com.	172800	IN	NS	f.gtld-servers.net.
+com.	172800	IN	NS	k.gtld-servers.net.
+com.	172800	IN	NS	m.gtld-servers.net.
+com.	172800	IN	NS	i.gtld-servers.net.
+com.	172800	IN	NS	g.gtld-servers.net.
+com.	172800	IN	NS	a.gtld-servers.net.
 com.	172800	IN	NS	c.gtld-servers.net.
 com.	172800	IN	NS	e.gtld-servers.net.
-com.	172800	IN	NS	h.gtld-servers.net.
-com.	172800	IN	NS	i.gtld-servers.net.
-com.	172800	IN	NS	m.gtld-servers.net.
-com.	172800	IN	NS	l.gtld-servers.net.
-com.	172800	IN	NS	a.gtld-servers.net.
 
 ;; ADDITIONAL SECTION:
-m.gtld-servers.net.	172800	IN	A	192.55.83.30
 l.gtld-servers.net.	172800	IN	A	192.41.162.30
-k.gtld-servers.net.	172800	IN	A	192.52.178.30
-j.gtld-servers.net.	172800	IN	A	192.48.79.30
-i.gtld-servers.net.	172800	IN	A	192.43.172.30
-h.gtld-servers.net.	172800	IN	A	192.54.112.30
-g.gtld-servers.net.	172800	IN	A	192.42.93.30
-f.gtld-servers.net.	172800	IN	A	192.35.51.30
-e.gtld-servers.net.	172800	IN	A	192.12.94.30
-d.gtld-servers.net.	172800	IN	A	192.31.80.30
-c.gtld-servers.net.	172800	IN	A	192.26.92.30
-b.gtld-servers.net.	172800	IN	A	192.33.14.30
-a.gtld-servers.net.	172800	IN	A	192.5.6.30
-m.gtld-servers.net.	172800	IN	AAAA	2001:501:b1f9::30
 l.gtld-servers.net.	172800	IN	AAAA	2001:500:d937::30
-k.gtld-servers.net.	172800	IN	AAAA	2001:503:d2d::30
+j.gtld-servers.net.	172800	IN	A	192.48.79.30
 j.gtld-servers.net.	172800	IN	AAAA	2001:502:7094::30
-i.gtld-servers.net.	172800	IN	AAAA	2001:503:39c1::30
+h.gtld-servers.net.	172800	IN	A	192.54.112.30
 h.gtld-servers.net.	172800	IN	AAAA	2001:502:8cc::30
-g.gtld-servers.net.	172800	IN	AAAA	2001:503:eea3::30
-f.gtld-servers.net.	172800	IN	AAAA	2001:503:d414::30
-e.gtld-servers.net.	172800	IN	AAAA	2001:502:1ca1::30
+d.gtld-servers.net.	172800	IN	A	192.31.80.30
 d.gtld-servers.net.	172800	IN	AAAA	2001:500:856e::30
-c.gtld-servers.net.	172800	IN	AAAA	2001:503:83eb::30
+b.gtld-servers.net.	172800	IN	A	192.33.14.30
 b.gtld-servers.net.	172800	IN	AAAA	2001:503:231d::2:30
+f.gtld-servers.net.	172800	IN	A	192.35.51.30
+f.gtld-servers.net.	172800	IN	AAAA	2001:503:d414::30
+k.gtld-servers.net.	172800	IN	A	192.52.178.30
+k.gtld-servers.net.	172800	IN	AAAA	2001:503:d2d::30
+m.gtld-servers.net.	172800	IN	A	192.55.83.30
+m.gtld-servers.net.	172800	IN	AAAA	2001:501:b1f9::30
+i.gtld-servers.net.	172800	IN	A	192.43.172.30
+i.gtld-servers.net.	172800	IN	AAAA	2001:503:39c1::30
+g.gtld-servers.net.	172800	IN	A	192.42.93.30
+g.gtld-servers.net.	172800	IN	AAAA	2001:503:eea3::30
+a.gtld-servers.net.	172800	IN	A	192.5.6.30
 a.gtld-servers.net.	172800	IN	AAAA	2001:503:a83e::2:30
+c.gtld-servers.net.	172800	IN	A	192.26.92.30
+c.gtld-servers.net.	172800	IN	AAAA	2001:503:83eb::30
+e.gtld-servers.net.	172800	IN	A	192.12.94.30
+e.gtld-servers.net.	172800	IN	AAAA	2001:502:1ca1::30
 
-;; SERVER: 192.36.148.17
+;; SERVER: 198.41.0.4
 ; <<>> recursive <<>> @192.5.6.30 A aba8735d2c3d241de.awsglobalaccelerator.com.
-;; opcode: QUERY, status: NOERROR, id: 51782
+;; opcode: QUERY, status: NOERROR, id: 55664
 ;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 4, ADDITIONAL: 2
 
 ;; OPT PSEUDOSECTION:
@@ -1583,28 +1570,7 @@ ns-409.awsdns-51.com.	172800	IN	A	205.251.193.153
 
 ;; SERVER: 192.5.6.30
 ; <<>> recursive <<>> @205.251.193.153 A aba8735d2c3d241de.awsglobalaccelerator.com.
-;; opcode: QUERY, status: NOERROR, id: 64813
-;; flags: qr aa rd; QUERY: 1, ANSWER: 2, AUTHORITY: 4, ADDITIONAL: 1
-
-;; OPT PSEUDOSECTION:
-; EDNS: version 0; flags:; udp: 4096
-
-;; QUESTION SECTION:
-;aba8735d2c3d241de.awsglobalaccelerator.com.	IN	 A
-
-;; ANSWER SECTION:
-aba8735d2c3d241de.awsglobalaccelerator.com.	300	IN	A	166.117.98.246
-aba8735d2c3d241de.awsglobalaccelerator.com.	300	IN	A	166.117.166.206
-
-;; AUTHORITY SECTION:
-awsglobalaccelerator.com.	172800	IN	NS	ns-1484.awsdns-57.org.
-awsglobalaccelerator.com.	172800	IN	NS	ns-1949.awsdns-51.co.uk.
-awsglobalaccelerator.com.	172800	IN	NS	ns-409.awsdns-51.com.
-awsglobalaccelerator.com.	172800	IN	NS	ns-609.awsdns-12.net.
-
-;; SERVER: 205.251.193.153
-; <<>> recursive <<>> @205.251.193.153 A aba8735d2c3d241de.awsglobalaccelerator.com.
-;; opcode: QUERY, status: NOERROR, id: 8173
+;; opcode: QUERY, status: NOERROR, id: 25992
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 2, AUTHORITY: 4, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
@@ -1625,7 +1591,28 @@ awsglobalaccelerator.com.	172800	IN	NS	ns-609.awsdns-12.net.
 
 ;; SERVER: 205.251.193.153
 ; <<>> recursive <<>> @205.251.193.153 A aba8735d2c3d241de.awsglobalaccelerator.com.
-;; opcode: QUERY, status: NOERROR, id: 53092
+;; opcode: QUERY, status: NOERROR, id: 2282
+;; flags: qr aa rd; QUERY: 1, ANSWER: 2, AUTHORITY: 4, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version 0; flags:; udp: 4096
+
+;; QUESTION SECTION:
+;aba8735d2c3d241de.awsglobalaccelerator.com.	IN	 A
+
+;; ANSWER SECTION:
+aba8735d2c3d241de.awsglobalaccelerator.com.	300	IN	A	166.117.166.206
+aba8735d2c3d241de.awsglobalaccelerator.com.	300	IN	A	166.117.98.246
+
+;; AUTHORITY SECTION:
+awsglobalaccelerator.com.	172800	IN	NS	ns-1484.awsdns-57.org.
+awsglobalaccelerator.com.	172800	IN	NS	ns-1949.awsdns-51.co.uk.
+awsglobalaccelerator.com.	172800	IN	NS	ns-409.awsdns-51.com.
+awsglobalaccelerator.com.	172800	IN	NS	ns-609.awsdns-12.net.
+
+;; SERVER: 205.251.193.153
+; <<>> recursive <<>> @205.251.193.153 A aba8735d2c3d241de.awsglobalaccelerator.com.
+;; opcode: QUERY, status: NOERROR, id: 40955
 ;; flags: qr aa rd; QUERY: 1, ANSWER: 2, AUTHORITY: 4, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:

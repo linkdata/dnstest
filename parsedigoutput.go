@@ -38,9 +38,10 @@ func isEmptyMsg(m *dns.Msg) bool {
 //
 // If it reads a line starting with "; <<>> " and it has found data, it returns.
 // This allows reading consecutive messages from a single stream.
-func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) {
+func ParseDigOutput(r io.Reader) ([]Exchange, error) {
 	var (
-		msg            dns.Msg
+		msg            = new(dns.Msg)
+		retv           []Exchange
 		srvaddr        string
 		section        = "" // "", "question", "answer", "authority", "additional", "opt"
 		rrBuf          []string
@@ -58,8 +59,10 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) {
 
 		// DIG version line (separates entries)
 		if strings.HasPrefix(line, "; <<>> ") {
-			if !isEmptyMsg(&msg) {
-				break
+			if !isEmptyMsg(msg) {
+				retv = append(retv, Exchange{Server: srvaddr, Msg: msg})
+				msg = new(dns.Msg)
+				srvaddr = ""
 			}
 			continue
 		}
@@ -91,7 +94,7 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) {
 		// FLAGS / COUNTS (may be same line as HEADER or the next one)
 		if strings.HasPrefix(line, ";; flags:") || (seenHeaderLine && strings.HasPrefix(line, "flags:")) {
 			if m := flagsRe.FindStringSubmatch(line); m != nil {
-				setFlags(&msg, m[1])
+				setFlags(msg, m[1])
 			}
 			// counts are not strictly required to be set in MsgHdr; dns.Msg
 			// derives them from the slices on pack. We parse them only to avoid surprises.
@@ -204,7 +207,7 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) {
 				rr, err = dns.NewRR(strings.Join(fieldsClean(rrLine), " "))
 			}
 			if err != nil {
-				return nil, srvaddr, fmt.Errorf("parse RR in %s: %q: %w", section, rrLine, err)
+				return nil, fmt.Errorf("parse RR in %s: %q: %w", section, rrLine, err)
 			}
 			if rr == nil {
 				continue
@@ -229,14 +232,14 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) {
 	}
 
 	if err := sc.Err(); err != nil {
-		return nil, srvaddr, err
+		return nil, err
 	}
 
-	if isEmptyMsg(&msg) {
-		return nil, "", io.EOF
+	if !isEmptyMsg(msg) {
+		retv = append(retv, Exchange{Server: srvaddr, Msg: msg})
 	}
 
-	return &msg, srvaddr, nil
+	return retv, nil
 }
 
 // --- helpers ---

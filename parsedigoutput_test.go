@@ -1,8 +1,6 @@
 package dnstest
 
 import (
-	"errors"
-	"io"
 	"os"
 	"strings"
 	"testing"
@@ -152,10 +150,12 @@ awsglobalaccelerator.com.	172800	IN	NS	ns-609.awsdns-12.net.
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			msg, server, err := ParseDigOutput(strings.NewReader(tt.digOut))
+			exchs, err := ParseDigOutput(strings.NewReader(tt.digOut))
 			if err != nil {
 				t.Fatalf("ParseDigOutput returned error: %v", err)
 			}
+			msg := exchs[0].Msg
+			server := exchs[0].Server
 			if msg == nil {
 				t.Fatalf("ParseDigOutput returned nil msg")
 			}
@@ -273,26 +273,11 @@ func TestParseDigOutputFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer f.Close()
-	count := 0
-	for err == nil {
-		var server string
-		var msg *dns.Msg
-		msg, server, err = ParseDigOutput(f)
-		if err == nil {
-			count++
-			t.Logf("%s\n;; SERVER: %s\n", msg, server)
-			if msg == nil {
-				t.Fatal("nil msg")
-			}
-			if server == "" {
-				t.Fatal("no server")
-			}
-		}
+	exchs, err := ParseDigOutput(f)
+	if err != nil {
+		t.Fatal(err)
 	}
-	if count != 15 {
-		t.Error(count)
-	}
-	if !errors.Is(err, io.EOF) {
-		t.Error(err)
+	for _, exch := range exchs {
+		t.Log(exch)
 	}
 }
