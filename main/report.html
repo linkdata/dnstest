@@ -59,7 +59,7 @@
 				
 				<option value="file1">github.com/linkdata/dnstest/network.go (0.0%)</option>
 				
-				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (80.0%)</option>
+				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (79.9%)</option>
 				
 				<option value="file3">github.com/linkdata/dnstest/server.go (97.6%)</option>
 				
@@ -205,7 +205,7 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) <span class="cov8" ti
                 }
 
                 // HEADER line (id/opcode/status)
-                <span class="cov8" title="1">if strings.Contains(line, ";; -&gt;&gt;HEADER&lt;&lt;-") </span><span class="cov8" title="1">{
+                <span class="cov8" title="1">if strings.HasPrefix(line, ";; -&gt;&gt;HEADER&lt;&lt;-") || (!seenHeaderLine &amp;&amp; strings.HasPrefix(line, ";; opcode:")) </span><span class="cov8" title="1">{
                         seenHeaderLine = true
                         if m := headerRe.FindStringSubmatch(line); m != nil </span><span class="cov8" title="1">{
                                 msg.Id = parseUint16(m[3])
@@ -392,8 +392,7 @@ func normalizeRR(s string) string <span class="cov8" title="1">{
 }</span>
 
 func setFlags(msg *dns.Msg, flags string) <span class="cov8" title="1">{
-        fl := strings.Fields(strings.ToLower(flags))
-        for _, f := range fl </span><span class="cov8" title="1">{
+        for f := range strings.FieldsSeq(strings.ToLower(flags)) </span><span class="cov8" title="1">{
                 switch f </span>{
                 case "qr":<span class="cov8" title="1">
                         msg.Response = true</span>
