@@ -50,6 +50,9 @@ func TestServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("tcp exchange: %v", err)
 	}
+	if !in.Authoritative {
+		t.Fatal("expected AUTH answer")
+	}
 	got = fmt.Sprint(in.Answer)
 	if want != got {
 		t.Fatalf("\nwant %q\n got %q\n", want, got)
