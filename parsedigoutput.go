@@ -76,7 +76,7 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) {
 		}
 
 		// HEADER line (id/opcode/status)
-		if strings.Contains(line, ";; ->>HEADER<<-") {
+		if strings.HasPrefix(line, ";; ->>HEADER<<-") || (!seenHeaderLine && strings.HasPrefix(line, ";; opcode:")) {
 			seenHeaderLine = true
 			if m := headerRe.FindStringSubmatch(line); m != nil {
 				msg.Id = parseUint16(m[3])
@@ -263,8 +263,7 @@ func normalizeRR(s string) string {
 }
 
 func setFlags(msg *dns.Msg, flags string) {
-	fl := strings.Fields(strings.ToLower(flags))
-	for _, f := range fl {
+	for f := range strings.FieldsSeq(strings.ToLower(flags)) {
 		switch f {
 		case "qr":
 			msg.Response = true

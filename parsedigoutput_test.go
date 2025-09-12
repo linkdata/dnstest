@@ -107,6 +107,44 @@ example.        3600    IN  SOA a.iana-servers.net. noc.dns.icann.org. 202501010
 			wantDO:           false,
 			wantUDP:          4096,
 		},
+		{
+			name: "recursive",
+			digOut: strings.TrimSpace(`
+; <<>> recursive <<>> @205.251.193.153 A aba8735d2c3d241de.awsglobalaccelerator.com.
+;; opcode: QUERY, status: NOERROR, id: 8173
+;; flags: qr ra aa rd; QUERY: 1, ANSWER: 2, AUTHORITY: 4, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version 0; flags:; udp: 4096
+
+;; QUESTION SECTION:
+;aba8735d2c3d241de.awsglobalaccelerator.com.	IN	 A
+
+;; ANSWER SECTION:
+aba8735d2c3d241de.awsglobalaccelerator.com.	300	IN	A	166.117.166.206
+aba8735d2c3d241de.awsglobalaccelerator.com.	300	IN	A	166.117.98.246
+
+;; AUTHORITY SECTION:
+awsglobalaccelerator.com.	172800	IN	NS	ns-1484.awsdns-57.org.
+awsglobalaccelerator.com.	172800	IN	NS	ns-1949.awsdns-51.co.uk.
+awsglobalaccelerator.com.	172800	IN	NS	ns-409.awsdns-51.com.
+awsglobalaccelerator.com.	172800	IN	NS	ns-609.awsdns-12.net.
+
+;; SERVER: 205.251.193.153
+`),
+			wantID:           8173,
+			wantRcode:        dns.RcodeSuccess,
+			wantOpcode:       dns.OpcodeQuery,
+			wantServer:       "205.251.193.153",
+			wantQname:        "aba8735d2c3d241de.awsglobalaccelerator.com.",
+			wantQtype:        dns.TypeA,
+			wantQclass:       dns.ClassINET,
+			wantAnswerLens:   2,
+			wantNsLens:       4,
+			wantExtraAtLeast: 1,
+			wantDO:           false,
+			wantUDP:          4096,
+		},
 	}
 
 	for _, tt := range tests {
