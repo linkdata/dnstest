@@ -22,6 +22,15 @@ var (
 	ednsRe = regexp.MustCompile(`EDNS:\s*version:?[\s]*([0-9]+)[,;]?\s*flags:\s*([a-z ]*);?\s*udp:\s*([0-9]+)`)
 )
 
+func isEmptyMsg(m *dns.Msg) bool {
+	if m != nil {
+		if len(m.Question) > 0 || len(m.Answer) > 0 || len(m.Extra) > 0 || len(m.Ns) > 0 || m.Rcode != dns.RcodeSuccess {
+			return false
+		}
+	}
+	return true
+}
+
 // ParseDigOutput turns the stdout text of `dig` into a dns.Msg, the server that
 // was queried (as "host" or "host#port" if available), and an error.
 // It best-effort fills MsgHdr (id, opcode, rcode, flags), Question, Answer,
@@ -48,8 +57,11 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) {
 		}
 
 		// DIG version line (separates entries)
-		if strings.HasPrefix(line, "; <<>> ") && seenHeaderLine {
-			break
+		if strings.HasPrefix(line, "; <<>> ") {
+			if !isEmptyMsg(&msg) {
+				break
+			}
+			continue
 		}
 
 		// SERVER line
@@ -218,13 +230,10 @@ func ParseDigOutput(r io.Reader) (*dns.Msg, string, error) {
 		return nil, srvaddr, err
 	}
 
-	// If we never saw a header but we have content, it's still a usable Msg.
-	// Ensure Response bit usually true for dig outputs.
-	if !msg.Response {
-		msg.Response = true
+	if isEmptyMsg(&msg) {
+		return nil, "", io.EOF
 	}
 
-	// Sanity: must have at least one question to be a proper response, but we don't enforce.
 	return &msg, srvaddr, nil
 }
 

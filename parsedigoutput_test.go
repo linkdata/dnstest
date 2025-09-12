@@ -1,6 +1,9 @@
 package dnstest
 
 import (
+	"errors"
+	"io"
+	"os"
 	"strings"
 	"testing"
 
@@ -222,5 +225,36 @@ example.        3600    IN  SOA a.iana-servers.net. noc.dns.icann.org. 202501010
 				}
 			}
 		})
+	}
+}
+
+func TestParseDigOutputFile(t *testing.T) {
+	t.Parallel()
+	f, err := os.OpenFile("testdata/a_console_aws_amazon_com.txt", os.O_RDONLY, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	count := 0
+	for err == nil {
+		var server string
+		var msg *dns.Msg
+		msg, server, err = ParseDigOutput(f)
+		if err == nil {
+			count++
+			t.Logf("%s\n;; SERVER: %s\n", msg, server)
+			if msg == nil {
+				t.Fatal("nil msg")
+			}
+			if server == "" {
+				t.Fatal("no server")
+			}
+		}
+	}
+	if count != 15 {
+		t.Error(count)
+	}
+	if !errors.Is(err, io.EOF) {
+		t.Error(err)
 	}
 }
