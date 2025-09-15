@@ -193,11 +193,9 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) {
 					case "additional":
 						// Avoid duplicating OPT; dig often renders OPT in the pseudo-section,
 						// but sometimes also shows other additionals (A/AAAA for NS target etc).
-						if _, ok := rr.(*dns.OPT); ok {
-							// ensure it’s the EDNS we already set; skip duplicate
-							continue
+						if _, ok := rr.(*dns.OPT); !ok {
+							msg.Extra = append(msg.Extra, rr)
 						}
-						msg.Extra = append(msg.Extra, rr)
 					}
 				}
 			}
