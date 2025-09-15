@@ -2,7 +2,6 @@ package dnstest
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"regexp"
 	"strconv"
@@ -38,7 +37,7 @@ func isEmptyMsg(m *dns.Msg) bool {
 //
 // If it reads a line starting with "; <<>> " and it has found data, it returns.
 // This allows reading consecutive messages from a single stream.
-func ParseDigOutput(r io.Reader) ([]Exchange, error) {
+func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) {
 	var (
 		msg            = new(dns.Msg)
 		retv           []Exchange
@@ -51,7 +50,7 @@ func ParseDigOutput(r io.Reader) ([]Exchange, error) {
 
 	sc := bufio.NewScanner(r)
 
-	for sc.Scan() {
+	for err == nil && sc.Scan() {
 		line := strings.TrimSpace(sc.Text())
 		if line == "" {
 			continue
@@ -65,6 +64,8 @@ func ParseDigOutput(r io.Reader) ([]Exchange, error) {
 			msg = new(dns.Msg)
 			srvaddr = ""
 			seenHeaderLine = false
+			parenDepth = 0
+			rrBuf = nil
 			continue
 		}
 
@@ -191,42 +192,37 @@ func ParseDigOutput(r io.Reader) ([]Exchange, error) {
 			rrLine := normalizeRR(strings.Join(rrBuf, " "))
 			rrBuf = rrBuf[:0]
 
-			rr, err := dns.NewRR(rrLine)
-			if err != nil {
-				// Try a less-aggressive normalization before giving up
-				rr, err = dns.NewRR(strings.Join(fieldsClean(rrLine), " "))
-			}
-			if err != nil {
-				return nil, fmt.Errorf("parse RR in %s: %q: %w", section, rrLine, err)
-			}
-			if rr == nil {
-				continue
-			}
-			switch section {
-			case "answer":
-				msg.Answer = append(msg.Answer, rr)
-			case "authority":
-				msg.Ns = append(msg.Ns, rr)
-			case "additional":
-				// Avoid duplicating OPT; dig often renders OPT in the pseudo-section,
-				// but sometimes also shows other additionals (A/AAAA for NS target etc).
-				if _, ok := rr.(*dns.OPT); ok {
-					// ensure it’s the EDNS we already set; skip duplicate
-					continue
+			var rr dns.RR
+			if rr, err = dns.NewRR(strings.Join(fieldsClean(rrLine), " ")); err == nil && rr != nil {
+				if err == nil && rr != nil {
+					switch section {
+					case "answer":
+						msg.Answer = append(msg.Answer, rr)
+					case "authority":
+						msg.Ns = append(msg.Ns, rr)
+					case "additional":
+						// Avoid duplicating OPT; dig often renders OPT in the pseudo-section,
+						// but sometimes also shows other additionals (A/AAAA for NS target etc).
+						if _, ok := rr.(*dns.OPT); ok {
+							// ensure it’s the EDNS we already set; skip duplicate
+							continue
+						}
+						msg.Extra = append(msg.Extra, rr)
+					}
 				}
-				msg.Extra = append(msg.Extra, rr)
 			}
 		}
 	}
 
-	err := sc.Err()
 	if err == nil {
-		if !isEmptyMsg(msg) {
-			retv = append(retv, Exchange{Server: srvaddr, Msg: msg})
+		if err = sc.Err(); err == nil {
+			if !isEmptyMsg(msg) {
+				retv = append(retv, Exchange{Server: srvaddr, Msg: msg})
+			}
+			exchs = retv
 		}
-		return retv, nil
 	}
-	return nil, err
+	return
 }
 
 // --- helpers ---
