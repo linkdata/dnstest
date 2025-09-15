@@ -59,7 +59,7 @@
 				
 				<option value="file1">github.com/linkdata/dnstest/network.go (0.0%)</option>
 				
-				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (96.0%)</option>
+				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (95.9%)</option>
 				
 				<option value="file3">github.com/linkdata/dnstest/server.go (97.6%)</option>
 				
@@ -319,21 +319,19 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) <span class="cov8
 
                                 var rr dns.RR
                                 if rr, err = dns.NewRR(strings.Join(fieldsClean(rrLine), " ")); err == nil &amp;&amp; rr != nil </span><span class="cov8" title="1">{
-                                        if err == nil &amp;&amp; rr != nil </span><span class="cov8" title="1">{
-                                                switch section </span>{
-                                                case "answer":<span class="cov8" title="1">
-                                                        msg.Answer = append(msg.Answer, rr)</span>
-                                                case "authority":<span class="cov8" title="1">
-                                                        msg.Ns = append(msg.Ns, rr)</span>
-                                                case "additional":<span class="cov8" title="1">
-                                                        // Avoid duplicating OPT; dig often renders OPT in the pseudo-section,
-                                                        // but sometimes also shows other additionals (A/AAAA for NS target etc).
-                                                        if _, ok := rr.(*dns.OPT); ok </span><span class="cov0" title="0">{
-                                                                // ensure it’s the EDNS we already set; skip duplicate
-                                                                continue</span>
-                                                        }
-                                                        <span class="cov8" title="1">msg.Extra = append(msg.Extra, rr)</span>
+                                        switch section </span>{
+                                        case "answer":<span class="cov8" title="1">
+                                                msg.Answer = append(msg.Answer, rr)</span>
+                                        case "authority":<span class="cov8" title="1">
+                                                msg.Ns = append(msg.Ns, rr)</span>
+                                        case "additional":<span class="cov8" title="1">
+                                                // Avoid duplicating OPT; dig often renders OPT in the pseudo-section,
+                                                // but sometimes also shows other additionals (A/AAAA for NS target etc).
+                                                if _, ok := rr.(*dns.OPT); ok </span><span class="cov0" title="0">{
+                                                        // ensure it’s the EDNS we already set; skip duplicate
+                                                        continue</span>
                                                 }
+                                                <span class="cov8" title="1">msg.Extra = append(msg.Extra, rr)</span>
                                         }
                                 }
                         }
