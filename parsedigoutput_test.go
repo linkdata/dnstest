@@ -110,7 +110,7 @@ example.        3600    IN  SOA a.iana-servers.net. noc.dns.icann.org. 202501010
 			digOut: strings.TrimSpace(`
 ; <<>> recursive <<>> @205.251.193.153 A aba8735d2c3d241de.awsglobalaccelerator.com.
 ;; opcode: QUERY, status: NOERROR, id: 8173
-;; flags: qr ra aa rd; QUERY: 1, ANSWER: 2, AUTHORITY: 4, ADDITIONAL: 1
+;; flags: qr ra aa rd cd tc; QUERY: 1, ANSWER: 2, AUTHORITY: 4, ADDITIONAL: 1
 
 ;; OPT PSEUDOSECTION:
 ; EDNS: version 0; flags:; udp: 4096

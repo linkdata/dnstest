@@ -269,64 +269,28 @@ func setFlags(msg *dns.Msg, flags string) {
 }
 
 func opcodeFromString(s string) int {
-	switch strings.ToUpper(strings.TrimSpace(s)) {
-	case "QUERY":
-		return dns.OpcodeQuery
-	case "IQUERY", "IQ":
-		return dns.OpcodeIQuery // deprecated but map it if seen
-	case "STATUS":
-		return dns.OpcodeStatus
-	case "NOTIFY":
-		return dns.OpcodeNotify
-	case "UPDATE":
-		return dns.OpcodeUpdate
-	default:
-		return dns.OpcodeQuery
-	}
+	return dns.StringToOpcode[strings.ToUpper(strings.TrimSpace(s))]
 }
 
-func rcodeFromString(s string) int {
-	switch strings.ToUpper(strings.TrimSpace(s)) {
-	case "NOERROR", "SUCCESS":
-		return dns.RcodeSuccess
-	case "FORMERR":
-		return dns.RcodeFormatError
-	case "SERVFAIL":
-		return dns.RcodeServerFailure
-	case "NXDOMAIN":
-		return dns.RcodeNameError
-	case "NOTIMP":
-		return dns.RcodeNotImplemented
-	case "REFUSED":
-		return dns.RcodeRefused
-	case "YXDOMAIN":
-		return dns.RcodeYXDomain
-	case "YXRRSET":
-		return dns.RcodeYXRrset
-	case "NXRRSET":
-		return dns.RcodeNXRrset
-	case "NOTAUTH":
-		return dns.RcodeNotAuth
-	case "NOTZONE":
-		return dns.RcodeNotZone
-	case "BADVERS", "BADSIG": // dig sometimes shows BADVERS for EDNS version error
-		return dns.RcodeBadVers
-	default:
-		return dns.RcodeSuccess
+func rcodeFromString(s string) (rcode int) {
+	s = strings.ToUpper(strings.TrimSpace(s))
+	switch s {
+	case "SUCCESS":
+		s = "NOERROR"
+	case "BADVERS":
+		s = "BADSIG"
 	}
+	return dns.StringToRcode[s]
 }
 
 func typeFromString(s string) uint16 {
-	if v, ok := dns.StringToType[strings.ToUpper(s)]; ok {
-		return v
-	}
-	return dns.TypeNone
+	return dns.StringToType[strings.ToUpper(s)]
 }
 
-func classFromString(s string) uint16 {
+func classFromString(s string) (c uint16) {
+	c = dns.ClassINET
 	if v, ok := dns.StringToClass[strings.ToUpper(s)]; ok {
-		return v
+		c = v
 	}
-	// dig often uses "IN"
-	return dns.ClassINET
+	return
 }
