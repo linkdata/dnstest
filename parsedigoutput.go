@@ -160,14 +160,10 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) {
 						opt = &dns.OPT{}
 						opt.Hdr.Name = "."
 						opt.Hdr.Rrtype = dns.TypeOPT
-						opt.SetUDPSize(udpSize)
-						opt.SetDo(do)
 						msg.Extra = append(msg.Extra, opt)
-					} else {
-						// Update existing
-						opt.SetUDPSize(udpSize)
-						opt.SetDo(do)
 					}
+					opt.SetUDPSize(udpSize)
+					opt.SetDo(do)
 					// Version (m[1]) is typically 0; miekg/dns keeps it in opt.Hdr.Ttl bits.
 					// dns.EDNS0_VERSION is encoded in TTL upper 8 bits; we leave default (0).
 				}
