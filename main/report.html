@@ -59,7 +59,7 @@
 				
 				<option value="file1">github.com/linkdata/dnstest/network.go (0.0%)</option>
 				
-				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (84.5%)</option>
+				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (84.3%)</option>
 				
 				<option value="file3">github.com/linkdata/dnstest/server.go (97.6%)</option>
 				
@@ -180,163 +180,160 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) <span class="cov8
         sc := bufio.NewScanner(r)
 
         for err == nil &amp;&amp; sc.Scan() </span><span class="cov8" title="1">{
-                line := strings.TrimSpace(sc.Text())
-                if line == "" </span><span class="cov8" title="1">{
-                        continue</span>
-                }
-
-                // DIG version line (separates entries)
-                <span class="cov8" title="1">if strings.HasPrefix(line, "; &lt;&lt;&gt;&gt; ") </span><span class="cov8" title="1">{
-                        if !isEmptyMsg(msg) </span><span class="cov8" title="1">{
-                                retv = append(retv, Exchange{Server: srvaddr, Msg: msg})
-                        }</span>
-                        <span class="cov8" title="1">msg = new(dns.Msg)
-                        srvaddr = ""
-                        seenHeaderLine = false
-                        parenDepth = 0
-                        rrBuf = nil
-                        continue</span>
-                }
-
-                // SERVER line
-                <span class="cov8" title="1">if strings.HasPrefix(line, ";; SERVER:") </span><span class="cov8" title="1">{
-                        if m := serverRe.FindStringSubmatch(line); m != nil </span><span class="cov8" title="1">{
-                                srvaddr = m[1]
-                                if m[2] != "" </span><span class="cov8" title="1">{
-                                        srvaddr = srvaddr + "#" + m[2]
+                if line := strings.TrimSpace(sc.Text()); line != "" </span><span class="cov8" title="1">{
+                        // DIG version line (separates entries)
+                        if strings.HasPrefix(line, "; &lt;&lt;&gt;&gt; ") </span><span class="cov8" title="1">{
+                                if !isEmptyMsg(msg) </span><span class="cov8" title="1">{
+                                        retv = append(retv, Exchange{Server: srvaddr, Msg: msg})
                                 }</span>
+                                <span class="cov8" title="1">msg = new(dns.Msg)
+                                srvaddr = ""
+                                seenHeaderLine = false
+                                parenDepth = 0
+                                rrBuf = nil
+                                continue</span>
                         }
-                        <span class="cov8" title="1">continue</span>
-                }
 
-                // HEADER line (id/opcode/status)
-                <span class="cov8" title="1">if !seenHeaderLine </span><span class="cov8" title="1">{
-                        if strings.HasPrefix(line, ";; -&gt;&gt;HEADER&lt;&lt;-") || strings.HasPrefix(line, ";; opcode:") </span><span class="cov8" title="1">{
-                                seenHeaderLine = true
-                                if m := headerRe.FindStringSubmatch(line); m != nil </span><span class="cov8" title="1">{
-                                        msg.Id = parseUint16(m[3])
-                                        msg.Opcode = opcodeFromString(m[1])
-                                        msg.Rcode = rcodeFromString(m[2])
+                        // SERVER line
+                        <span class="cov8" title="1">if strings.HasPrefix(line, ";; SERVER:") </span><span class="cov8" title="1">{
+                                if m := serverRe.FindStringSubmatch(line); m != nil </span><span class="cov8" title="1">{
+                                        srvaddr = m[1]
+                                        if m[2] != "" </span><span class="cov8" title="1">{
+                                                srvaddr = srvaddr + "#" + m[2]
+                                        }</span>
+                                }
+                                <span class="cov8" title="1">continue</span>
+                        }
+
+                        // HEADER line (id/opcode/status)
+                        <span class="cov8" title="1">if !seenHeaderLine </span><span class="cov8" title="1">{
+                                if strings.HasPrefix(line, ";; -&gt;&gt;HEADER&lt;&lt;-") || strings.HasPrefix(line, ";; opcode:") </span><span class="cov8" title="1">{
+                                        seenHeaderLine = true
+                                        if m := headerRe.FindStringSubmatch(line); m != nil </span><span class="cov8" title="1">{
+                                                msg.Id = parseUint16(m[3])
+                                                msg.Opcode = opcodeFromString(m[1])
+                                                msg.Rcode = rcodeFromString(m[2])
+                                        }</span>
+                                        <span class="cov8" title="1">continue</span>
+                                }
+                        }
+
+                        // FLAGS / COUNTS (may be same line as HEADER or the next one)
+                        <span class="cov8" title="1">if strings.HasPrefix(line, ";; flags:") || (seenHeaderLine &amp;&amp; strings.HasPrefix(line, "flags:")) </span><span class="cov8" title="1">{
+                                if m := flagsRe.FindStringSubmatch(line); m != nil </span><span class="cov8" title="1">{
+                                        setFlags(msg, m[1])
+                                }</span>
+                                // counts are not strictly required to be set in MsgHdr; dns.Msg
+                                // derives them from the slices on pack. We parse them only to avoid surprises.
+                                <span class="cov8" title="1">if m := countsRe.FindStringSubmatch(line); m != nil </span><span class="cov8" title="1">{
+                                        // No-op; present for validation. We rely on slice lengths.
+                                        _ = m
                                 }</span>
                                 <span class="cov8" title="1">continue</span>
                         }
-                }
 
-                // FLAGS / COUNTS (may be same line as HEADER or the next one)
-                <span class="cov8" title="1">if strings.HasPrefix(line, ";; flags:") || (seenHeaderLine &amp;&amp; strings.HasPrefix(line, "flags:")) </span><span class="cov8" title="1">{
-                        if m := flagsRe.FindStringSubmatch(line); m != nil </span><span class="cov8" title="1">{
-                                setFlags(msg, m[1])
-                        }</span>
-                        // counts are not strictly required to be set in MsgHdr; dns.Msg
-                        // derives them from the slices on pack. We parse them only to avoid surprises.
-                        <span class="cov8" title="1">if m := countsRe.FindStringSubmatch(line); m != nil </span><span class="cov8" title="1">{
-                                // No-op; present for validation. We rely on slice lengths.
-                                _ = m
-                        }</span>
-                        <span class="cov8" title="1">continue</span>
-                }
-
-                <span class="cov8" title="1">if strings.HasPrefix(line, ";; ") </span><span class="cov8" title="1">{
-                        if strings.HasSuffix(line, "SECTION:") </span><span class="cov8" title="1">{
-                                section = ""
-                                switch line </span>{
-                                case ";; QUESTION SECTION:":<span class="cov8" title="1">
-                                        section = "question"</span>
-                                case ";; ANSWER SECTION:":<span class="cov8" title="1">
-                                        section = "answer"</span>
-                                case ";; AUTHORITY SECTION:":<span class="cov8" title="1">
-                                        section = "authority"</span>
-                                case ";; ADDITIONAL SECTION:":<span class="cov8" title="1">
-                                        section = "additional"</span>
-                                case ";; OPT PSEUDOSECTION:":<span class="cov8" title="1">
-                                        section = "opt"</span>
+                        <span class="cov8" title="1">if strings.HasPrefix(line, ";; ") </span><span class="cov8" title="1">{
+                                if strings.HasSuffix(line, "SECTION:") </span><span class="cov8" title="1">{
+                                        section = ""
+                                        switch line </span>{
+                                        case ";; QUESTION SECTION:":<span class="cov8" title="1">
+                                                section = "question"</span>
+                                        case ";; ANSWER SECTION:":<span class="cov8" title="1">
+                                                section = "answer"</span>
+                                        case ";; AUTHORITY SECTION:":<span class="cov8" title="1">
+                                                section = "authority"</span>
+                                        case ";; ADDITIONAL SECTION:":<span class="cov8" title="1">
+                                                section = "additional"</span>
+                                        case ";; OPT PSEUDOSECTION:":<span class="cov8" title="1">
+                                                section = "opt"</span>
+                                        }
                                 }
+                                <span class="cov8" title="1">continue</span>
                         }
-                        <span class="cov8" title="1">continue</span>
-                }
 
-                // Parse the active section
-                <span class="cov8" title="1">switch section </span>{
-                case "question":<span class="cov8" title="1">
-                        // Format usually: ";example.com.            IN      A"
-                        if after, ok := strings.CutPrefix(line, ";"); ok </span><span class="cov8" title="1">{
-                                s := strings.TrimSpace(after)
-                                parts := fieldsClean(s)
-                                // Some dig builds can omit class and show just name + type in QUESTION.
-                                // We try [name class type] then [name type].
-                                switch len(parts) </span>{
-                                case 2:<span class="cov8" title="1">
-                                        name := parts[0]
-                                        qtype := parts[1]
-                                        msg.Question = append(msg.Question, dns.Question{
-                                                Name:   dns.Fqdn(name),
-                                                Qtype:  typeFromString(qtype),
-                                                Qclass: dns.ClassINET,
-                                        })</span>
-                                default:<span class="cov8" title="1">
-                                        if len(parts) &gt;= 3 </span><span class="cov8" title="1">{
-                                                name, classStr, typeStr := parts[0], parts[1], parts[2]
+                        // Parse the active section
+                        <span class="cov8" title="1">switch section </span>{
+                        case "question":<span class="cov8" title="1">
+                                // Format usually: ";example.com.            IN      A"
+                                if after, ok := strings.CutPrefix(line, ";"); ok </span><span class="cov8" title="1">{
+                                        s := strings.TrimSpace(after)
+                                        parts := fieldsClean(s)
+                                        // Some dig builds can omit class and show just name + type in QUESTION.
+                                        // We try [name class type] then [name type].
+                                        switch len(parts) </span>{
+                                        case 2:<span class="cov8" title="1">
+                                                name := parts[0]
+                                                qtype := parts[1]
                                                 msg.Question = append(msg.Question, dns.Question{
                                                         Name:   dns.Fqdn(name),
-                                                        Qtype:  typeFromString(typeStr),
-                                                        Qclass: classFromString(classStr),
-                                                })
-                                        }</span>
+                                                        Qtype:  typeFromString(qtype),
+                                                        Qclass: dns.ClassINET,
+                                                })</span>
+                                        default:<span class="cov8" title="1">
+                                                if len(parts) &gt;= 3 </span><span class="cov8" title="1">{
+                                                        name, classStr, typeStr := parts[0], parts[1], parts[2]
+                                                        msg.Question = append(msg.Question, dns.Question{
+                                                                Name:   dns.Fqdn(name),
+                                                                Qtype:  typeFromString(typeStr),
+                                                                Qclass: classFromString(classStr),
+                                                        })
+                                                }</span>
+                                        }
                                 }
-                        }
 
-                case "opt":<span class="cov8" title="1">
-                        // The EDNS summary may be on the next line after the ";; OPT PSEUDOSECTION:" header.
-                        // Accept lines starting with ';' or raw.
-                        l := strings.TrimPrefix(line, ";")
-                        l = strings.TrimSpace(l)
-                        if m := ednsRe.FindStringSubmatch(l); m != nil </span><span class="cov8" title="1">{
-                                udpSize := parseUint16(m[3])
-                                do := strings.Contains(strings.ToLower(m[2]), "do")
-                                opt := msg.IsEdns0()
-                                if opt == nil </span><span class="cov8" title="1">{
-                                        opt = &amp;dns.OPT{}
-                                        opt.Hdr.Name = "."
-                                        opt.Hdr.Rrtype = dns.TypeOPT
-                                        opt.SetUDPSize(udpSize)
-                                        opt.SetDo(do)
-                                        msg.Extra = append(msg.Extra, opt)
-                                }</span> else<span class="cov0" title="0"> {
-                                        // Update existing
-                                        opt.SetUDPSize(udpSize)
-                                        opt.SetDo(do)
-                                }</span>
-                                // Version (m[1]) is typically 0; miekg/dns keeps it in opt.Hdr.Ttl bits.
-                                // dns.EDNS0_VERSION is encoded in TTL upper 8 bits; we leave default (0).
-                        }
-                        // If the line is not the EDNS summary (e.g., "; NSID: ..."), we ignore.
+                        case "opt":<span class="cov8" title="1">
+                                // The EDNS summary may be on the next line after the ";; OPT PSEUDOSECTION:" header.
+                                // Accept lines starting with ';' or raw.
+                                l := strings.TrimPrefix(line, ";")
+                                l = strings.TrimSpace(l)
+                                if m := ednsRe.FindStringSubmatch(l); m != nil </span><span class="cov8" title="1">{
+                                        udpSize := parseUint16(m[3])
+                                        do := strings.Contains(strings.ToLower(m[2]), "do")
+                                        opt := msg.IsEdns0()
+                                        if opt == nil </span><span class="cov8" title="1">{
+                                                opt = &amp;dns.OPT{}
+                                                opt.Hdr.Name = "."
+                                                opt.Hdr.Rrtype = dns.TypeOPT
+                                                opt.SetUDPSize(udpSize)
+                                                opt.SetDo(do)
+                                                msg.Extra = append(msg.Extra, opt)
+                                        }</span> else<span class="cov0" title="0"> {
+                                                // Update existing
+                                                opt.SetUDPSize(udpSize)
+                                                opt.SetDo(do)
+                                        }</span>
+                                        // Version (m[1]) is typically 0; miekg/dns keeps it in opt.Hdr.Ttl bits.
+                                        // dns.EDNS0_VERSION is encoded in TTL upper 8 bits; we leave default (0).
+                                }
+                                // If the line is not the EDNS summary (e.g., "; NSID: ..."), we ignore.
 
-                case "answer", "authority", "additional":<span class="cov8" title="1">
-                        // Collect RRs; handle multi-line with parentheses the same way dig prints folded records.
-                        parenDepth += strings.Count(line, "(") - strings.Count(line, ")")
-                        rrBuf = append(rrBuf, line)
-                        if parenDepth &gt; 0 </span><span class="cov8" title="1">{
-                                continue</span>
-                        }
-                        <span class="cov8" title="1">rrLine := normalizeRR(strings.Join(rrBuf, " "))
-                        rrBuf = rrBuf[:0]
+                        case "answer", "authority", "additional":<span class="cov8" title="1">
+                                // Collect RRs; handle multi-line with parentheses the same way dig prints folded records.
+                                parenDepth += strings.Count(line, "(") - strings.Count(line, ")")
+                                rrBuf = append(rrBuf, line)
+                                if parenDepth &gt; 0 </span><span class="cov8" title="1">{
+                                        continue</span>
+                                }
+                                <span class="cov8" title="1">rrLine := normalizeRR(strings.Join(rrBuf, " "))
+                                rrBuf = rrBuf[:0]
 
-                        var rr dns.RR
-                        if rr, err = dns.NewRR(strings.Join(fieldsClean(rrLine), " ")); err == nil &amp;&amp; rr != nil </span><span class="cov8" title="1">{
-                                if err == nil &amp;&amp; rr != nil </span><span class="cov8" title="1">{
-                                        switch section </span>{
-                                        case "answer":<span class="cov8" title="1">
-                                                msg.Answer = append(msg.Answer, rr)</span>
-                                        case "authority":<span class="cov8" title="1">
-                                                msg.Ns = append(msg.Ns, rr)</span>
-                                        case "additional":<span class="cov8" title="1">
-                                                // Avoid duplicating OPT; dig often renders OPT in the pseudo-section,
-                                                // but sometimes also shows other additionals (A/AAAA for NS target etc).
-                                                if _, ok := rr.(*dns.OPT); ok </span><span class="cov0" title="0">{
-                                                        // ensure it’s the EDNS we already set; skip duplicate
-                                                        continue</span>
+                                var rr dns.RR
+                                if rr, err = dns.NewRR(strings.Join(fieldsClean(rrLine), " ")); err == nil &amp;&amp; rr != nil </span><span class="cov8" title="1">{
+                                        if err == nil &amp;&amp; rr != nil </span><span class="cov8" title="1">{
+                                                switch section </span>{
+                                                case "answer":<span class="cov8" title="1">
+                                                        msg.Answer = append(msg.Answer, rr)</span>
+                                                case "authority":<span class="cov8" title="1">
+                                                        msg.Ns = append(msg.Ns, rr)</span>
+                                                case "additional":<span class="cov8" title="1">
+                                                        // Avoid duplicating OPT; dig often renders OPT in the pseudo-section,
+                                                        // but sometimes also shows other additionals (A/AAAA for NS target etc).
+                                                        if _, ok := rr.(*dns.OPT); ok </span><span class="cov0" title="0">{
+                                                                // ensure it’s the EDNS we already set; skip duplicate
+                                                                continue</span>
+                                                        }
+                                                        <span class="cov8" title="1">msg.Extra = append(msg.Extra, rr)</span>
                                                 }
-                                                <span class="cov8" title="1">msg.Extra = append(msg.Extra, rr)</span>
                                         }
                                 }
                         }
