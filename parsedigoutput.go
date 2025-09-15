@@ -190,21 +190,19 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) {
 
 				var rr dns.RR
 				if rr, err = dns.NewRR(strings.Join(fieldsClean(rrLine), " ")); err == nil && rr != nil {
-					if err == nil && rr != nil {
-						switch section {
-						case "answer":
-							msg.Answer = append(msg.Answer, rr)
-						case "authority":
-							msg.Ns = append(msg.Ns, rr)
-						case "additional":
-							// Avoid duplicating OPT; dig often renders OPT in the pseudo-section,
-							// but sometimes also shows other additionals (A/AAAA for NS target etc).
-							if _, ok := rr.(*dns.OPT); ok {
-								// ensure it’s the EDNS we already set; skip duplicate
-								continue
-							}
-							msg.Extra = append(msg.Extra, rr)
+					switch section {
+					case "answer":
+						msg.Answer = append(msg.Answer, rr)
+					case "authority":
+						msg.Ns = append(msg.Ns, rr)
+					case "additional":
+						// Avoid duplicating OPT; dig often renders OPT in the pseudo-section,
+						// but sometimes also shows other additionals (A/AAAA for NS target etc).
+						if _, ok := rr.(*dns.OPT); ok {
+							// ensure it’s the EDNS we already set; skip duplicate
+							continue
 						}
+						msg.Extra = append(msg.Extra, rr)
 					}
 				}
 			}
