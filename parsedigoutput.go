@@ -30,13 +30,8 @@ func isEmptyMsg(m *dns.Msg) bool {
 	return true
 }
 
-// ParseDigOutput turns the stdout text of `dig` into a dns.Msg, the server that
-// was queried (as "host" or "host#port" if available), and an error.
-// It best-effort fills MsgHdr (id, opcode, rcode, flags), Question, Answer,
-// Authority, Additional, and EDNS (via OPT PSEUDOSECTION).
-//
-// If it reads a line starting with "; <<>> " and it has found data, it returns.
-// This allows reading consecutive messages from a single stream.
+// ParseDigOutput turns the stdout text of one or more invocations of `dig`
+// into []Exchange.
 func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) {
 	var (
 		msg            = new(dns.Msg)
