@@ -59,7 +59,7 @@
 				
 				<option value="file1">github.com/linkdata/dnstest/network.go (0.0%)</option>
 				
-				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (98.3%)</option>
+				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (96.8%)</option>
 				
 				<option value="file3">github.com/linkdata/dnstest/server.go (97.6%)</option>
 				
@@ -166,26 +166,32 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) <span class="cov8
                 msg            = new(dns.Msg)
                 retv           []Exchange
                 srvaddr        string
+                errstr         string
                 section        = "" // "", "question", "answer", "authority", "additional", "opt"
                 rrBuf          []string
                 parenDepth     int
                 seenHeaderLine bool
         )
 
-        sc := bufio.NewScanner(r)
+        consume := func() </span><span class="cov8" title="1">{
+                if !isEmptyMsg(msg) </span><span class="cov8" title="1">{
+                        retv = append(retv, Exchange{Msg: msg, Server: srvaddr, Error: errstr})
+                }</span>
+                <span class="cov8" title="1">msg = new(dns.Msg)
+                srvaddr = ""
+                errstr = ""
+                seenHeaderLine = false
+                parenDepth = 0
+                rrBuf = nil</span>
+        }
+
+        <span class="cov8" title="1">sc := bufio.NewScanner(r)
 
         for err == nil &amp;&amp; sc.Scan() </span><span class="cov8" title="1">{
                 if line := strings.TrimSpace(sc.Text()); line != "" </span><span class="cov8" title="1">{
                         // DIG version line (separates entries)
                         if strings.HasPrefix(line, "; &lt;&lt;&gt;&gt; ") </span><span class="cov8" title="1">{
-                                if !isEmptyMsg(msg) </span><span class="cov8" title="1">{
-                                        retv = append(retv, Exchange{Msg: msg, Server: srvaddr})
-                                }</span>
-                                <span class="cov8" title="1">msg = new(dns.Msg)
-                                srvaddr = ""
-                                seenHeaderLine = false
-                                parenDepth = 0
-                                rrBuf = nil
+                                consume()
                                 continue</span>
                         }
 
@@ -194,10 +200,16 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) <span class="cov8
                                 if m := serverRe.FindStringSubmatch(line); m != nil </span><span class="cov8" title="1">{
                                         srvaddr = m[1]
                                         if m[2] != "" </span><span class="cov8" title="1">{
-                                                srvaddr = srvaddr + "#" + m[2]
+                                                srvaddr = srvaddr + ":" + m[2]
                                         }</span>
                                 }
                                 <span class="cov8" title="1">continue</span>
+                        }
+
+                        // ERROR line
+                        <span class="cov8" title="1">if after, ok := strings.CutPrefix(line, ";; ERROR:"); ok </span><span class="cov0" title="0">{
+                                errstr = strings.TrimSpace(after)
+                                continue</span>
                         }
 
                         // HEADER line (id/opcode/status)
@@ -329,11 +341,9 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) <span class="cov8
 
         <span class="cov8" title="1">if err == nil </span><span class="cov8" title="1">{
                 if err = sc.Err(); err == nil </span><span class="cov8" title="1">{
-                        if !isEmptyMsg(msg) </span><span class="cov8" title="1">{
-                                retv = append(retv, Exchange{Msg: msg, Server: srvaddr})
-                        }</span>
-                        <span class="cov8" title="1">exchs = retv</span>
-                }
+                        consume()
+                        exchs = retv
+                }</span>
         }
         <span class="cov8" title="1">return</span>
 }
