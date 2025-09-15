@@ -50,7 +50,7 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) {
 			// DIG version line (separates entries)
 			if strings.HasPrefix(line, "; <<>> ") {
 				if !isEmptyMsg(msg) {
-					retv = append(retv, Exchange{Server: srvaddr, Msg: msg})
+					retv = append(retv, Exchange{Msg: msg, Server: srvaddr})
 				}
 				msg = new(dns.Msg)
 				srvaddr = ""
@@ -201,7 +201,7 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) {
 	if err == nil {
 		if err = sc.Err(); err == nil {
 			if !isEmptyMsg(msg) {
-				retv = append(retv, Exchange{Server: srvaddr, Msg: msg})
+				retv = append(retv, Exchange{Msg: msg, Server: srvaddr})
 			}
 			exchs = retv
 		}
