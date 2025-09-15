@@ -238,16 +238,16 @@ func ParseDigOutput(r io.Reader) ([]Exchange, error) <span class="cov8" title="1
                 <span class="cov8" title="1">if strings.HasPrefix(line, ";; ") </span><span class="cov8" title="1">{
                         if strings.HasSuffix(line, "SECTION:") </span><span class="cov8" title="1">{
                                 section = ""
-                                switch </span>{
-                                case strings.HasPrefix(line, ";; QUESTION SECTION:"):<span class="cov8" title="1">
+                                switch line </span>{
+                                case ";; QUESTION SECTION:":<span class="cov8" title="1">
                                         section = "question"</span>
-                                case strings.HasPrefix(line, ";; ANSWER SECTION:"):<span class="cov8" title="1">
+                                case ";; ANSWER SECTION:":<span class="cov8" title="1">
                                         section = "answer"</span>
-                                case strings.HasPrefix(line, ";; AUTHORITY SECTION:"):<span class="cov8" title="1">
+                                case ";; AUTHORITY SECTION:":<span class="cov8" title="1">
                                         section = "authority"</span>
-                                case strings.HasPrefix(line, ";; ADDITIONAL SECTION:"):<span class="cov8" title="1">
+                                case ";; ADDITIONAL SECTION:":<span class="cov8" title="1">
                                         section = "additional"</span>
-                                case strings.HasPrefix(line, ";; OPT PSEUDOSECTION:"):<span class="cov8" title="1">
+                                case ";; OPT PSEUDOSECTION:":<span class="cov8" title="1">
                                         section = "opt"</span>
                                 }
                         }
