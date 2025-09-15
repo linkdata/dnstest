@@ -109,16 +109,16 @@ func ParseDigOutput(r io.Reader) ([]Exchange, error) {
 		if strings.HasPrefix(line, ";; ") {
 			if strings.HasSuffix(line, "SECTION:") {
 				section = ""
-				switch {
-				case strings.HasPrefix(line, ";; QUESTION SECTION:"):
+				switch line {
+				case ";; QUESTION SECTION:":
 					section = "question"
-				case strings.HasPrefix(line, ";; ANSWER SECTION:"):
+				case ";; ANSWER SECTION:":
 					section = "answer"
-				case strings.HasPrefix(line, ";; AUTHORITY SECTION:"):
+				case ";; AUTHORITY SECTION:":
 					section = "authority"
-				case strings.HasPrefix(line, ";; ADDITIONAL SECTION:"):
+				case ";; ADDITIONAL SECTION:":
 					section = "additional"
-				case strings.HasPrefix(line, ";; OPT PSEUDOSECTION:"):
+				case ";; OPT PSEUDOSECTION:":
 					section = "opt"
 				}
 			}
