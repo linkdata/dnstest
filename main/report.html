@@ -59,7 +59,7 @@
 				
 				<option value="file1">github.com/linkdata/dnstest/network.go (0.0%)</option>
 				
-				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (82.3%)</option>
+				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (81.9%)</option>
 				
 				<option value="file3">github.com/linkdata/dnstest/server.go (97.6%)</option>
 				
@@ -190,10 +190,11 @@ func ParseDigOutput(r io.Reader) ([]Exchange, error) <span class="cov8" title="1
                 <span class="cov8" title="1">if strings.HasPrefix(line, "; &lt;&lt;&gt;&gt; ") </span><span class="cov8" title="1">{
                         if !isEmptyMsg(msg) </span><span class="cov8" title="1">{
                                 retv = append(retv, Exchange{Server: srvaddr, Msg: msg})
-                                msg = new(dns.Msg)
-                                srvaddr = ""
                         }</span>
-                        <span class="cov8" title="1">continue</span>
+                        <span class="cov8" title="1">msg = new(dns.Msg)
+                        srvaddr = ""
+                        seenHeaderLine = false
+                        continue</span>
                 }
 
                 // SERVER line
@@ -234,34 +235,23 @@ func ParseDigOutput(r io.Reader) ([]Exchange, error) <span class="cov8" title="1
                         <span class="cov8" title="1">continue</span>
                 }
 
-                // Section switches
-                <span class="cov8" title="1">switch </span>{
-                case strings.HasPrefix(line, ";; QUESTION SECTION:"):<span class="cov8" title="1">
-                        section = "question"
-                        continue</span>
-                case strings.HasPrefix(line, ";; ANSWER SECTION:"):<span class="cov8" title="1">
-                        section = "answer"
-                        continue</span>
-                case strings.HasPrefix(line, ";; AUTHORITY SECTION:"):<span class="cov8" title="1">
-                        section = "authority"
-                        continue</span>
-                case strings.HasPrefix(line, ";; ADDITIONAL SECTION:"):<span class="cov8" title="1">
-                        section = "additional"
-                        continue</span>
-                case strings.HasPrefix(line, ";; OPT PSEUDOSECTION:"):<span class="cov8" title="1">
-                        section = "opt"
-                        continue</span>
-                case strings.HasPrefix(line, ";; TSIG PSEUDOSECTION:"):<span class="cov0" title="0">
-                        // Not reconstructing TSIG (dig rarely shows it; wire details not present).
-                        section = "" // consume, but ignore TSIG contents safely
-                        continue</span>
-                }
-
-                // Stop lines we just ignore
-                <span class="cov8" title="1">if strings.HasPrefix(line, ";; Query time:") ||
-                        strings.HasPrefix(line, ";; WHEN:") ||
-                        strings.HasPrefix(line, ";; MSG SIZE") </span><span class="cov8" title="1">{
-                        continue</span>
+                <span class="cov8" title="1">if strings.HasPrefix(line, ";; ") </span><span class="cov8" title="1">{
+                        if strings.HasSuffix(line, "SECTION:") </span><span class="cov8" title="1">{
+                                section = ""
+                                switch </span>{
+                                case strings.HasPrefix(line, ";; QUESTION SECTION:"):<span class="cov8" title="1">
+                                        section = "question"</span>
+                                case strings.HasPrefix(line, ";; ANSWER SECTION:"):<span class="cov8" title="1">
+                                        section = "answer"</span>
+                                case strings.HasPrefix(line, ";; AUTHORITY SECTION:"):<span class="cov8" title="1">
+                                        section = "authority"</span>
+                                case strings.HasPrefix(line, ";; ADDITIONAL SECTION:"):<span class="cov8" title="1">
+                                        section = "additional"</span>
+                                case strings.HasPrefix(line, ";; OPT PSEUDOSECTION:"):<span class="cov8" title="1">
+                                        section = "opt"</span>
+                                }
+                        }
+                        <span class="cov8" title="1">continue</span>
                 }
 
                 // Parse the active section
@@ -338,7 +328,7 @@ func ParseDigOutput(r io.Reader) ([]Exchange, error) <span class="cov8" title="1
                         <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
                                 return nil, fmt.Errorf("parse RR in %s: %q: %w", section, rrLine, err)
                         }</span>
-                        <span class="cov8" title="1">if rr == nil </span><span class="cov8" title="1">{
+                        <span class="cov8" title="1">if rr == nil </span><span class="cov0" title="0">{
                                 continue</span>
                         }
                         <span class="cov8" title="1">switch section </span>{
@@ -355,20 +345,17 @@ func ParseDigOutput(r io.Reader) ([]Exchange, error) <span class="cov8" title="1
                                 }
                                 <span class="cov8" title="1">msg.Extra = append(msg.Extra, rr)</span>
                         }
-                default:<span class="cov8" title="1"></span>
-                        // No active section; ignore noise
                 }
         }
 
-        <span class="cov8" title="1">if err := sc.Err(); err != nil </span><span class="cov0" title="0">{
-                return nil, err
-        }</span>
-
-        <span class="cov8" title="1">if !isEmptyMsg(msg) </span><span class="cov8" title="1">{
-                retv = append(retv, Exchange{Server: srvaddr, Msg: msg})
-        }</span>
-
-        <span class="cov8" title="1">return retv, nil</span>
+        <span class="cov8" title="1">err := sc.Err()
+        if err == nil </span><span class="cov8" title="1">{
+                if !isEmptyMsg(msg) </span><span class="cov8" title="1">{
+                        retv = append(retv, Exchange{Server: srvaddr, Msg: msg})
+                }</span>
+                <span class="cov8" title="1">return retv, nil</span>
+        }
+        <span class="cov0" title="0">return nil, err</span>
 }
 
 // --- helpers ---
@@ -446,7 +433,7 @@ func rcodeFromString(s string) int <span class="cov8" title="1">{
                 return dns.RcodeNameError</span>
         case "NOTIMP":<span class="cov0" title="0">
                 return dns.RcodeNotImplemented</span>
-        case "REFUSED":<span class="cov0" title="0">
+        case "REFUSED":<span class="cov8" title="1">
                 return dns.RcodeRefused</span>
         case "YXDOMAIN":<span class="cov0" title="0">
                 return dns.RcodeYXDomain</span>
@@ -469,7 +456,7 @@ func typeFromString(s string) uint16 <span class="cov8" title="1">{
         if v, ok := dns.StringToType[strings.ToUpper(s)]; ok </span><span class="cov8" title="1">{
                 return v
         }</span>
-        <span class="cov8" title="1">return dns.TypeNone</span>
+        <span class="cov0" title="0">return dns.TypeNone</span>
 }
 
 func classFromString(s string) uint16 <span class="cov8" title="1">{
@@ -477,7 +464,7 @@ func classFromString(s string) uint16 <span class="cov8" title="1">{
                 return v
         }</span>
         // dig often uses "IN"
-        <span class="cov8" title="1">return dns.ClassINET</span>
+        <span class="cov0" title="0">return dns.ClassINET</span>
 }
 </pre>
 		
