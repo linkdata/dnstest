@@ -59,7 +59,7 @@
 				
 				<option value="file1">github.com/linkdata/dnstest/network.go (0.0%)</option>
 				
-				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (84.3%)</option>
+				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (96.0%)</option>
 				
 				<option value="file3">github.com/linkdata/dnstest/server.go (97.6%)</option>
 				
@@ -383,7 +383,7 @@ func setFlags(msg *dns.Msg, flags string) <span class="cov8" title="1">{
                         msg.Response = true</span>
                 case "aa":<span class="cov8" title="1">
                         msg.Authoritative = true</span>
-                case "tc":<span class="cov0" title="0">
+                case "tc":<span class="cov8" title="1">
                         msg.Truncated = true</span>
                 case "rd":<span class="cov8" title="1">
                         msg.RecursionDesired = true</span>
@@ -391,73 +391,37 @@ func setFlags(msg *dns.Msg, flags string) <span class="cov8" title="1">{
                         msg.RecursionAvailable = true</span>
                 case "ad":<span class="cov8" title="1">
                         msg.AuthenticatedData = true</span>
-                case "cd":<span class="cov0" title="0">
+                case "cd":<span class="cov8" title="1">
                         msg.CheckingDisabled = true</span>
                 }
         }
 }
 
 func opcodeFromString(s string) int <span class="cov8" title="1">{
-        switch strings.ToUpper(strings.TrimSpace(s)) </span>{
-        case "QUERY":<span class="cov8" title="1">
-                return dns.OpcodeQuery</span>
-        case "IQUERY", "IQ":<span class="cov0" title="0">
-                return dns.OpcodeIQuery</span> // deprecated but map it if seen
-        case "STATUS":<span class="cov0" title="0">
-                return dns.OpcodeStatus</span>
-        case "NOTIFY":<span class="cov0" title="0">
-                return dns.OpcodeNotify</span>
-        case "UPDATE":<span class="cov0" title="0">
-                return dns.OpcodeUpdate</span>
-        default:<span class="cov0" title="0">
-                return dns.OpcodeQuery</span>
-        }
-}
+        return dns.StringToOpcode[strings.ToUpper(strings.TrimSpace(s))]
+}</span>
 
-func rcodeFromString(s string) int <span class="cov8" title="1">{
-        switch strings.ToUpper(strings.TrimSpace(s)) </span>{
-        case "NOERROR", "SUCCESS":<span class="cov8" title="1">
-                return dns.RcodeSuccess</span>
-        case "FORMERR":<span class="cov0" title="0">
-                return dns.RcodeFormatError</span>
-        case "SERVFAIL":<span class="cov0" title="0">
-                return dns.RcodeServerFailure</span>
-        case "NXDOMAIN":<span class="cov8" title="1">
-                return dns.RcodeNameError</span>
-        case "NOTIMP":<span class="cov0" title="0">
-                return dns.RcodeNotImplemented</span>
-        case "REFUSED":<span class="cov8" title="1">
-                return dns.RcodeRefused</span>
-        case "YXDOMAIN":<span class="cov0" title="0">
-                return dns.RcodeYXDomain</span>
-        case "YXRRSET":<span class="cov0" title="0">
-                return dns.RcodeYXRrset</span>
-        case "NXRRSET":<span class="cov0" title="0">
-                return dns.RcodeNXRrset</span>
-        case "NOTAUTH":<span class="cov0" title="0">
-                return dns.RcodeNotAuth</span>
-        case "NOTZONE":<span class="cov0" title="0">
-                return dns.RcodeNotZone</span>
-        case "BADVERS", "BADSIG":<span class="cov0" title="0"> // dig sometimes shows BADVERS for EDNS version error
-                return dns.RcodeBadVers</span>
-        default:<span class="cov0" title="0">
-                return dns.RcodeSuccess</span>
+func rcodeFromString(s string) (rcode int) <span class="cov8" title="1">{
+        s = strings.ToUpper(strings.TrimSpace(s))
+        switch s </span>{
+        case "SUCCESS":<span class="cov0" title="0">
+                s = "NOERROR"</span>
+        case "BADVERS":<span class="cov0" title="0">
+                s = "BADSIG"</span>
         }
+        <span class="cov8" title="1">return dns.StringToRcode[s]</span>
 }
 
 func typeFromString(s string) uint16 <span class="cov8" title="1">{
-        if v, ok := dns.StringToType[strings.ToUpper(s)]; ok </span><span class="cov8" title="1">{
-                return v
-        }</span>
-        <span class="cov0" title="0">return dns.TypeNone</span>
-}
+        return dns.StringToType[strings.ToUpper(s)]
+}</span>
 
-func classFromString(s string) uint16 <span class="cov8" title="1">{
+func classFromString(s string) (c uint16) <span class="cov8" title="1">{
+        c = dns.ClassINET
         if v, ok := dns.StringToClass[strings.ToUpper(s)]; ok </span><span class="cov8" title="1">{
-                return v
+                c = v
         }</span>
-        // dig often uses "IN"
-        <span class="cov0" title="0">return dns.ClassINET</span>
+        <span class="cov8" title="1">return</span>
 }
 </pre>
 		
