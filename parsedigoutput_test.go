@@ -60,7 +60,7 @@ b.iana-servers.net. 3600 IN      A       199.43.135.53
 			wantID:           1234,
 			wantRcode:        dns.RcodeSuccess,
 			wantOpcode:       dns.OpcodeQuery,
-			wantServer:       "8.8.8.8#53",
+			wantServer:       "8.8.8.8:53",
 			wantQname:        "example.com.",
 			wantQtype:        dns.TypeA,
 			wantQclass:       dns.ClassINET,
@@ -95,7 +95,7 @@ example.        3600    IN  SOA a.iana-servers.net. noc.dns.icann.org. 202501010
 			wantID:           42,
 			wantRcode:        dns.RcodeNameError,
 			wantOpcode:       dns.OpcodeQuery,
-			wantServer:       "1.1.1.1#53",
+			wantServer:       "1.1.1.1:53",
 			wantQname:        "does-not-exist.example.",
 			wantQtype:        dns.TypeA,
 			wantQclass:       dns.ClassINET, // defaulted by parser

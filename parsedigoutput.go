@@ -37,11 +37,24 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) {
 		msg            = new(dns.Msg)
 		retv           []Exchange
 		srvaddr        string
+		errstr         string
 		section        = "" // "", "question", "answer", "authority", "additional", "opt"
 		rrBuf          []string
 		parenDepth     int
 		seenHeaderLine bool
 	)
+
+	consume := func() {
+		if !isEmptyMsg(msg) {
+			retv = append(retv, Exchange{Msg: msg, Server: srvaddr, Error: errstr})
+		}
+		msg = new(dns.Msg)
+		srvaddr = ""
+		errstr = ""
+		seenHeaderLine = false
+		parenDepth = 0
+		rrBuf = nil
+	}
 
 	sc := bufio.NewScanner(r)
 
@@ -49,14 +62,7 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) {
 		if line := strings.TrimSpace(sc.Text()); line != "" {
 			// DIG version line (separates entries)
 			if strings.HasPrefix(line, "; <<>> ") {
-				if !isEmptyMsg(msg) {
-					retv = append(retv, Exchange{Msg: msg, Server: srvaddr})
-				}
-				msg = new(dns.Msg)
-				srvaddr = ""
-				seenHeaderLine = false
-				parenDepth = 0
-				rrBuf = nil
+				consume()
 				continue
 			}
 
@@ -65,9 +71,15 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) {
 				if m := serverRe.FindStringSubmatch(line); m != nil {
 					srvaddr = m[1]
 					if m[2] != "" {
-						srvaddr = srvaddr + "#" + m[2]
+						srvaddr = srvaddr + ":" + m[2]
 					}
 				}
+				continue
+			}
+
+			// ERROR line
+			if after, ok := strings.CutPrefix(line, ";; ERROR:"); ok {
+				errstr = strings.TrimSpace(after)
 				continue
 			}
 
@@ -200,9 +212,7 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) {
 
 	if err == nil {
 		if err = sc.Err(); err == nil {
-			if !isEmptyMsg(msg) {
-				retv = append(retv, Exchange{Msg: msg, Server: srvaddr})
-			}
+			consume()
 			exchs = retv
 		}
 	}
