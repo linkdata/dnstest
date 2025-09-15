@@ -61,9 +61,10 @@ func ParseDigOutput(r io.Reader) ([]Exchange, error) {
 		if strings.HasPrefix(line, "; <<>> ") {
 			if !isEmptyMsg(msg) {
 				retv = append(retv, Exchange{Server: srvaddr, Msg: msg})
-				msg = new(dns.Msg)
-				srvaddr = ""
 			}
+			msg = new(dns.Msg)
+			srvaddr = ""
+			seenHeaderLine = false
 			continue
 		}
 
@@ -105,33 +106,22 @@ func ParseDigOutput(r io.Reader) ([]Exchange, error) {
 			continue
 		}
 
-		// Section switches
-		switch {
-		case strings.HasPrefix(line, ";; QUESTION SECTION:"):
-			section = "question"
-			continue
-		case strings.HasPrefix(line, ";; ANSWER SECTION:"):
-			section = "answer"
-			continue
-		case strings.HasPrefix(line, ";; AUTHORITY SECTION:"):
-			section = "authority"
-			continue
-		case strings.HasPrefix(line, ";; ADDITIONAL SECTION:"):
-			section = "additional"
-			continue
-		case strings.HasPrefix(line, ";; OPT PSEUDOSECTION:"):
-			section = "opt"
-			continue
-		case strings.HasPrefix(line, ";; TSIG PSEUDOSECTION:"):
-			// Not reconstructing TSIG (dig rarely shows it; wire details not present).
-			section = "" // consume, but ignore TSIG contents safely
-			continue
-		}
-
-		// Stop lines we just ignore
-		if strings.HasPrefix(line, ";; Query time:") ||
-			strings.HasPrefix(line, ";; WHEN:") ||
-			strings.HasPrefix(line, ";; MSG SIZE") {
+		if strings.HasPrefix(line, ";; ") {
+			if strings.HasSuffix(line, "SECTION:") {
+				section = ""
+				switch {
+				case strings.HasPrefix(line, ";; QUESTION SECTION:"):
+					section = "question"
+				case strings.HasPrefix(line, ";; ANSWER SECTION:"):
+					section = "answer"
+				case strings.HasPrefix(line, ";; AUTHORITY SECTION:"):
+					section = "authority"
+				case strings.HasPrefix(line, ";; ADDITIONAL SECTION:"):
+					section = "additional"
+				case strings.HasPrefix(line, ";; OPT PSEUDOSECTION:"):
+					section = "opt"
+				}
+			}
 			continue
 		}
 
@@ -226,20 +216,17 @@ func ParseDigOutput(r io.Reader) ([]Exchange, error) {
 				}
 				msg.Extra = append(msg.Extra, rr)
 			}
-		default:
-			// No active section; ignore noise
 		}
 	}
 
-	if err := sc.Err(); err != nil {
-		return nil, err
+	err := sc.Err()
+	if err == nil {
+		if !isEmptyMsg(msg) {
+			retv = append(retv, Exchange{Server: srvaddr, Msg: msg})
+		}
+		return retv, nil
 	}
-
-	if !isEmptyMsg(msg) {
-		retv = append(retv, Exchange{Server: srvaddr, Msg: msg})
-	}
-
-	return retv, nil
+	return nil, err
 }
 
 // --- helpers ---
