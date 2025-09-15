@@ -59,7 +59,7 @@
 				
 				<option value="file1">github.com/linkdata/dnstest/network.go (0.0%)</option>
 				
-				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (96.7%)</option>
+				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (98.3%)</option>
 				
 				<option value="file3">github.com/linkdata/dnstest/server.go (97.6%)</option>
 				
@@ -289,14 +289,10 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) <span class="cov8
                                                 opt = &amp;dns.OPT{}
                                                 opt.Hdr.Name = "."
                                                 opt.Hdr.Rrtype = dns.TypeOPT
-                                                opt.SetUDPSize(udpSize)
-                                                opt.SetDo(do)
                                                 msg.Extra = append(msg.Extra, opt)
-                                        }</span> else<span class="cov0" title="0"> {
-                                                // Update existing
-                                                opt.SetUDPSize(udpSize)
-                                                opt.SetDo(do)
                                         }</span>
+                                        <span class="cov8" title="1">opt.SetUDPSize(udpSize)
+                                        opt.SetDo(do)</span>
                                         // Version (m[1]) is typically 0; miekg/dns keeps it in opt.Hdr.Ttl bits.
                                         // dns.EDNS0_VERSION is encoded in TTL upper 8 bits; we leave default (0).
                                 }
