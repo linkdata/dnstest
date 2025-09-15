@@ -59,7 +59,7 @@
 				
 				<option value="file1">github.com/linkdata/dnstest/network.go (0.0%)</option>
 				
-				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (81.9%)</option>
+				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (84.5%)</option>
 				
 				<option value="file3">github.com/linkdata/dnstest/server.go (97.6%)</option>
 				
@@ -131,7 +131,6 @@ func NewNetwork(msgs []*dns.Msg) (nw *Network, err error) <span class="cov0" tit
 
 import (
         "bufio"
-        "fmt"
         "io"
         "regexp"
         "strconv"
@@ -167,7 +166,7 @@ func isEmptyMsg(m *dns.Msg) bool <span class="cov8" title="1">{
 //
 // If it reads a line starting with "; &lt;&lt;&gt;&gt; " and it has found data, it returns.
 // This allows reading consecutive messages from a single stream.
-func ParseDigOutput(r io.Reader) ([]Exchange, error) <span class="cov8" title="1">{
+func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) <span class="cov8" title="1">{
         var (
                 msg            = new(dns.Msg)
                 retv           []Exchange
@@ -180,7 +179,7 @@ func ParseDigOutput(r io.Reader) ([]Exchange, error) <span class="cov8" title="1
 
         sc := bufio.NewScanner(r)
 
-        for sc.Scan() </span><span class="cov8" title="1">{
+        for err == nil &amp;&amp; sc.Scan() </span><span class="cov8" title="1">{
                 line := strings.TrimSpace(sc.Text())
                 if line == "" </span><span class="cov8" title="1">{
                         continue</span>
@@ -194,6 +193,8 @@ func ParseDigOutput(r io.Reader) ([]Exchange, error) <span class="cov8" title="1
                         <span class="cov8" title="1">msg = new(dns.Msg)
                         srvaddr = ""
                         seenHeaderLine = false
+                        parenDepth = 0
+                        rrBuf = nil
                         continue</span>
                 }
 
@@ -320,42 +321,37 @@ func ParseDigOutput(r io.Reader) ([]Exchange, error) <span class="cov8" title="1
                         <span class="cov8" title="1">rrLine := normalizeRR(strings.Join(rrBuf, " "))
                         rrBuf = rrBuf[:0]
 
-                        rr, err := dns.NewRR(rrLine)
-                        if err != nil </span><span class="cov0" title="0">{
-                                // Try a less-aggressive normalization before giving up
-                                rr, err = dns.NewRR(strings.Join(fieldsClean(rrLine), " "))
-                        }</span>
-                        <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
-                                return nil, fmt.Errorf("parse RR in %s: %q: %w", section, rrLine, err)
-                        }</span>
-                        <span class="cov8" title="1">if rr == nil </span><span class="cov0" title="0">{
-                                continue</span>
-                        }
-                        <span class="cov8" title="1">switch section </span>{
-                        case "answer":<span class="cov8" title="1">
-                                msg.Answer = append(msg.Answer, rr)</span>
-                        case "authority":<span class="cov8" title="1">
-                                msg.Ns = append(msg.Ns, rr)</span>
-                        case "additional":<span class="cov8" title="1">
-                                // Avoid duplicating OPT; dig often renders OPT in the pseudo-section,
-                                // but sometimes also shows other additionals (A/AAAA for NS target etc).
-                                if _, ok := rr.(*dns.OPT); ok </span><span class="cov0" title="0">{
-                                        // ensure it’s the EDNS we already set; skip duplicate
-                                        continue</span>
+                        var rr dns.RR
+                        if rr, err = dns.NewRR(strings.Join(fieldsClean(rrLine), " ")); err == nil &amp;&amp; rr != nil </span><span class="cov8" title="1">{
+                                if err == nil &amp;&amp; rr != nil </span><span class="cov8" title="1">{
+                                        switch section </span>{
+                                        case "answer":<span class="cov8" title="1">
+                                                msg.Answer = append(msg.Answer, rr)</span>
+                                        case "authority":<span class="cov8" title="1">
+                                                msg.Ns = append(msg.Ns, rr)</span>
+                                        case "additional":<span class="cov8" title="1">
+                                                // Avoid duplicating OPT; dig often renders OPT in the pseudo-section,
+                                                // but sometimes also shows other additionals (A/AAAA for NS target etc).
+                                                if _, ok := rr.(*dns.OPT); ok </span><span class="cov0" title="0">{
+                                                        // ensure it’s the EDNS we already set; skip duplicate
+                                                        continue</span>
+                                                }
+                                                <span class="cov8" title="1">msg.Extra = append(msg.Extra, rr)</span>
+                                        }
                                 }
-                                <span class="cov8" title="1">msg.Extra = append(msg.Extra, rr)</span>
                         }
                 }
         }
 
-        <span class="cov8" title="1">err := sc.Err()
-        if err == nil </span><span class="cov8" title="1">{
-                if !isEmptyMsg(msg) </span><span class="cov8" title="1">{
-                        retv = append(retv, Exchange{Server: srvaddr, Msg: msg})
-                }</span>
-                <span class="cov8" title="1">return retv, nil</span>
+        <span class="cov8" title="1">if err == nil </span><span class="cov8" title="1">{
+                if err = sc.Err(); err == nil </span><span class="cov8" title="1">{
+                        if !isEmptyMsg(msg) </span><span class="cov8" title="1">{
+                                retv = append(retv, Exchange{Server: srvaddr, Msg: msg})
+                        }</span>
+                        <span class="cov8" title="1">exchs = retv</span>
+                }
         }
-        <span class="cov0" title="0">return nil, err</span>
+        <span class="cov8" title="1">return</span>
 }
 
 // --- helpers ---
