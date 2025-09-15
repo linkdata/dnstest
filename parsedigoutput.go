@@ -53,7 +53,7 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) {
 		errstr = ""
 		seenHeaderLine = false
 		parenDepth = 0
-		rrBuf = nil
+		rrBuf = rrBuf[:0]
 	}
 
 	sc := bufio.NewScanner(r)
@@ -185,24 +185,23 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) {
 				// Collect RRs; handle multi-line with parentheses the same way dig prints folded records.
 				parenDepth += strings.Count(line, "(") - strings.Count(line, ")")
 				rrBuf = append(rrBuf, line)
-				if parenDepth > 0 {
-					continue
-				}
-				rrLine := normalizeRR(strings.Join(rrBuf, " "))
-				rrBuf = rrBuf[:0]
-
-				var rr dns.RR
-				if rr, err = dns.NewRR(strings.Join(fieldsClean(rrLine), " ")); err == nil && rr != nil {
-					switch section {
-					case "answer":
-						msg.Answer = append(msg.Answer, rr)
-					case "authority":
-						msg.Ns = append(msg.Ns, rr)
-					case "additional":
-						// Avoid duplicating OPT; dig often renders OPT in the pseudo-section,
-						// but sometimes also shows other additionals (A/AAAA for NS target etc).
-						if _, ok := rr.(*dns.OPT); !ok {
-							msg.Extra = append(msg.Extra, rr)
+				if parenDepth < 1 {
+					rrLine := normalizeRR(strings.Join(rrBuf, " "))
+					parenDepth = 0
+					rrBuf = rrBuf[:0]
+					var rr dns.RR
+					if rr, err = dns.NewRR(strings.Join(fieldsClean(rrLine), " ")); err == nil && rr != nil {
+						switch section {
+						case "answer":
+							msg.Answer = append(msg.Answer, rr)
+						case "authority":
+							msg.Ns = append(msg.Ns, rr)
+						case "additional":
+							// Avoid duplicating OPT; dig often renders OPT in the pseudo-section,
+							// but sometimes also shows other additionals (A/AAAA for NS target etc).
+							if _, ok := rr.(*dns.OPT); !ok {
+								msg.Extra = append(msg.Extra, rr)
+							}
 						}
 					}
 				}
