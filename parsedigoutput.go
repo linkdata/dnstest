@@ -2,6 +2,9 @@ package dnstest
 
 import (
 	"bufio"
+	"bytes"
+	"compress/gzip"
+	"encoding/base64"
 	"io"
 	"regexp"
 	"strconv"
@@ -81,6 +84,21 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) {
 			if after, ok := strings.CutPrefix(line, ";; ERROR:"); ok {
 				errstr = strings.TrimSpace(after)
 				continue
+			}
+
+			// GZIPRAW line
+			if after, ok := strings.CutPrefix(line, ";; GZIPRAW:"); ok {
+				if b, e := base64.StdEncoding.DecodeString(strings.TrimSpace(after)); e == nil {
+					if gr, e := gzip.NewReader(bytes.NewReader(b)); e == nil {
+						if b, e = io.ReadAll(gr); e == nil {
+							var m2 dns.Msg
+							if e = m2.Unpack(b); e == nil {
+								msg = &m2
+							}
+						}
+						_ = gr.Close()
+					}
+				}
 			}
 
 			// HEADER line (id/opcode/status)
