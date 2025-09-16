@@ -59,7 +59,7 @@
 				
 				<option value="file1">github.com/linkdata/dnstest/network.go (0.0%)</option>
 				
-				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (96.8%)</option>
+				<option value="file2">github.com/linkdata/dnstest/parsedigoutput.go (97.0%)</option>
 				
 				<option value="file3">github.com/linkdata/dnstest/server.go (97.6%)</option>
 				
@@ -131,6 +131,9 @@ func NewNetwork(msgs []*dns.Msg) (nw *Network, err error) <span class="cov0" tit
 
 import (
         "bufio"
+        "bytes"
+        "compress/gzip"
+        "encoding/base64"
         "io"
         "regexp"
         "strconv"
@@ -210,6 +213,21 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) <span class="cov8
                         <span class="cov8" title="1">if after, ok := strings.CutPrefix(line, ";; ERROR:"); ok </span><span class="cov0" title="0">{
                                 errstr = strings.TrimSpace(after)
                                 continue</span>
+                        }
+
+                        // GZIPRAW line
+                        <span class="cov8" title="1">if after, ok := strings.CutPrefix(line, ";; GZIPRAW:"); ok </span><span class="cov8" title="1">{
+                                if b, e := base64.StdEncoding.DecodeString(strings.TrimSpace(after)); e == nil </span><span class="cov8" title="1">{
+                                        if gr, e := gzip.NewReader(bytes.NewReader(b)); e == nil </span><span class="cov8" title="1">{
+                                                if b, e = io.ReadAll(gr); e == nil </span><span class="cov8" title="1">{
+                                                        var m2 dns.Msg
+                                                        if e = m2.Unpack(b); e == nil </span><span class="cov8" title="1">{
+                                                                msg = &amp;m2
+                                                        }</span>
+                                                }
+                                                <span class="cov8" title="1">_ = gr.Close()</span>
+                                        }
+                                }
                         }
 
                         // HEADER line (id/opcode/status)
