@@ -64,9 +64,8 @@ func NewServer(responses map[Key]*Response) (s *Server, err error) {
 						Port:      port,
 						responses: responses,
 					}
-					handler := dns.HandlerFunc(s.handle)
-					s.udp = &dns.Server{PacketConn: udpConn, Handler: handler}
-					s.tcp = &dns.Server{Listener: tcpListener, Handler: handler}
+					s.udp = &dns.Server{PacketConn: udpConn, Handler: dns.HandlerFunc(s.handleUDP)}
+					s.tcp = &dns.Server{Listener: tcpListener, Handler: dns.HandlerFunc(s.handleTCP)}
 					go s.udp.ActivateAndServe()
 					go s.tcp.ActivateAndServe()
 				} else {
@@ -88,26 +87,37 @@ func (s *Server) Close() {
 	}
 }
 
-func (s *Server) handle(w dns.ResponseWriter, req *dns.Msg) {
+func (s *Server) handleUDP(w dns.ResponseWriter, req *dns.Msg) {
+	s.handle(w, req, "udp")
+}
+
+func (s *Server) handleTCP(w dns.ResponseWriter, req *dns.Msg) {
+	s.handle(w, req, "tcp")
+}
+
+func (s *Server) handle(w dns.ResponseWriter, req *dns.Msg, proto string) {
 	for _, q := range req.Question {
-		if resp, ok := s.responses[NewKey(q.Name, q.Qtype)]; ok {
-			if !resp.Drop {
-				if resp.Delay > 0 {
-					time.Sleep(resp.Delay)
-				}
-				if resp.Raw != nil {
-					_, _ = w.Write(resp.Raw)
-				} else {
-					m := new(dns.Msg)
-					if resp.Msg != nil {
-						resp.Msg.CopyTo(m)
+		for _, pro := range []string{proto, ""} {
+			if resp, ok := s.responses[NewKey(q.Name, q.Qtype, pro)]; ok {
+				if !resp.Drop {
+					if resp.Delay > 0 {
+						time.Sleep(resp.Delay)
 					}
-					m.SetReply(req)
-					if resp.Rcode != dns.RcodeSuccess {
-						m.Rcode = resp.Rcode
+					if resp.Raw != nil {
+						_, _ = w.Write(resp.Raw)
+					} else {
+						m := new(dns.Msg)
+						if resp.Msg != nil {
+							resp.Msg.CopyTo(m)
+						}
+						m.SetReply(req)
+						if resp.Rcode != dns.RcodeSuccess {
+							m.Rcode = resp.Rcode
+						}
+						_ = w.WriteMsg(m)
 					}
-					_ = w.WriteMsg(m)
 				}
+				break
 			}
 		}
 	}
