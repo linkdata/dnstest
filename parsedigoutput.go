@@ -81,7 +81,8 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) {
 			}
 
 			// dig SERVFAIL texts
-			if strings.HasPrefix(line, "couldn't get address") {
+			if strings.HasPrefix(line, "couldn't get address") ||
+				strings.HasPrefix(line, ";; no servers could be reached") {
 				errstr = line
 				continue
 			}
