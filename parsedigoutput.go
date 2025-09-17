@@ -63,8 +63,8 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) {
 
 	for err == nil && sc.Scan() {
 		if line := strings.TrimSpace(sc.Text()); line != "" {
-			// DIG version line (separates entries)
-			if strings.HasPrefix(line, "; <<>> ") {
+			// DIG version line or Got answer line (separates entries)
+			if strings.HasPrefix(line, "; <<>> ") || strings.HasPrefix(line, ";; Got answer:") {
 				consume()
 				continue
 			}
@@ -77,6 +77,12 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) {
 						srvaddr = srvaddr + ":" + m[2]
 					}
 				}
+				continue
+			}
+
+			// dig SERVFAIL texts
+			if strings.HasPrefix(line, "couldn't get address") {
+				errstr = line
 				continue
 			}
 

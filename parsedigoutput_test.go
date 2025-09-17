@@ -1,6 +1,7 @@
 package dnstest
 
 import (
+	"io/fs"
 	"os"
 	"strings"
 	"testing"
@@ -268,16 +269,45 @@ awsglobalaccelerator.com.	172800	IN	NS	ns-609.awsdns-12.net.
 
 func TestParseDigOutputFile(t *testing.T) {
 	t.Parallel()
-	f, err := os.OpenFile("testdata/a_console_aws_amazon_com.txt", os.O_RDONLY, 0)
+	digexchs := make(map[string][]Exchange)
+	recexchs := make(map[string][]Exchange)
+	err := fs.WalkDir(os.DirFS("."), "testdata", func(path string, d fs.DirEntry, err error) error {
+		if !d.IsDir() {
+			if f, err := os.OpenFile(path, os.O_RDONLY, 0); err == nil {
+				defer f.Close()
+				exchs, err := ParseDigOutput(f)
+				if err != nil {
+					t.Errorf("%q: %v", path, err)
+				} else {
+					if len(exchs) == 0 {
+						t.Error(path, "zero exchanges")
+					}
+					if after, ok := strings.CutPrefix(path, "testdata/dig/"); ok {
+						digexchs[after] = exchs
+					}
+					if after, ok := strings.CutPrefix(path, "testdata/recursive/"); ok {
+						recexchs[after] = exchs
+					}
+				}
+			}
+		}
+		return nil
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer f.Close()
-	exchs, err := ParseDigOutput(f)
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, exch := range exchs {
-		t.Log(exch)
+	for filename, digexs := range digexchs {
+		if recexs, ok := recexchs[filename]; ok {
+			digex := digexs[len(digexs)-1]
+			recex := recexs[len(recexs)-1]
+			if s := digex.Difference(recex); s != "" {
+				if digex.Error == "" {
+					t.Error(filename, s)
+				}
+			}
+		} else {
+			t.Error(filename, "not found in recexchs")
+		}
+
 	}
 }
