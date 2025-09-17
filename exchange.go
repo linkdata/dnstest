@@ -36,14 +36,19 @@ func (ex Exchange) Difference(other Exchange) (reason string) {
 			return fmt.Sprintf("Question[%v].Qtype %v != %v", i, ex.Question[i].Qtype, other.Question[i].Qtype)
 		}
 	}
-	if len(ex.Answer) != len(other.Answer) {
+	qtype := ex.Question[0].Qtype
+	found := len(ex.Answer) == 0 && len(other.Answer) == 0
+	for _, exans := range ex.Answer {
+		if exans.Header().Rrtype == qtype {
+			for _, oans := range other.Answer {
+				if oans.Header().Rrtype == qtype {
+					found = true
+				}
+			}
+		}
+	}
+	if !found {
 		return fmt.Sprintf("[%v]Answer != [%v]Answer", len(ex.Answer), len(other.Answer))
-	}
-	if len(ex.Ns) != len(other.Ns) {
-		return fmt.Sprintf("[%v]Ns != [%v]Ns", len(ex.Ns), len(other.Ns))
-	}
-	if len(ex.Extra) != len(other.Extra) {
-		return "[]Extra"
 	}
 	if ex.Error == other.Error {
 		return ""
