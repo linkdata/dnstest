@@ -216,7 +216,7 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) <span class="cov8
                         }
 
                         // GZIPRAW line
-                        <span class="cov8" title="1">if after, ok := strings.CutPrefix(line, ";; GZIPRAW:"); ok </span><span class="cov8" title="1">{
+                        <span class="cov8" title="1">if after, ok := strings.CutPrefix(line, ";; GZPACK:"); ok </span><span class="cov8" title="1">{
                                 if b, e := base64.StdEncoding.DecodeString(strings.TrimSpace(after)); e == nil </span><span class="cov8" title="1">{
                                         if gr, e := gzip.NewReader(bytes.NewReader(b)); e == nil </span><span class="cov8" title="1">{
                                                 if b, e = io.ReadAll(gr); e == nil </span><span class="cov8" title="1">{
