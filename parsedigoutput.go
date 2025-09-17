@@ -87,7 +87,7 @@ func ParseDigOutput(r io.Reader) (exchs []Exchange, err error) {
 			}
 
 			// GZIPRAW line
-			if after, ok := strings.CutPrefix(line, ";; GZIPRAW:"); ok {
+			if after, ok := strings.CutPrefix(line, ";; GZPACK:"); ok {
 				if b, e := base64.StdEncoding.DecodeString(strings.TrimSpace(after)); e == nil {
 					if gr, e := gzip.NewReader(bytes.NewReader(b)); e == nil {
 						if b, e = io.ReadAll(gr); e == nil {
