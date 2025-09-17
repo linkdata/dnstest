@@ -63,7 +63,7 @@
 				
 				<option value="file3">github.com/linkdata/dnstest/parsedigoutput.go (98.5%)</option>
 				
-				<option value="file4">github.com/linkdata/dnstest/server.go (97.6%)</option>
+				<option value="file4">github.com/linkdata/dnstest/server.go (97.7%)</option>
 				
 				</select>
 			</div>
@@ -143,15 +143,20 @@ import "github.com/miekg/dns"
 type Key struct {
         Qname string // DNS query canonical name
         Qtype uint16 // DNS query type
+        Proto string // "udp", "tcp" or "" for both
 }
 
 // NewKey returns a map key for the given question name and type.
-func NewKey(qname string, qtype uint16) Key <span class="cov8" title="1">{
-        return Key{
+func NewKey(qname string, qtype uint16, proto ...string) (k Key) <span class="cov8" title="1">{
+        k = Key{
                 Qname: dns.CanonicalName(qname),
                 Qtype: qtype,
         }
-}</span>
+        if len(proto) == 1 </span><span class="cov8" title="1">{
+                k.Proto = proto[0]
+        }</span>
+        <span class="cov8" title="1">return</span>
+}
 </pre>
 		
 		<pre class="file" id="file2" style="display: none">package dnstest
@@ -573,9 +578,8 @@ func NewServer(responses map[Key]*Response) (s *Server, err error) <span class="
                                                 Port:      port,
                                                 responses: responses,
                                         }
-                                        handler := dns.HandlerFunc(s.handle)
-                                        s.udp = &amp;dns.Server{PacketConn: udpConn, Handler: handler}
-                                        s.tcp = &amp;dns.Server{Listener: tcpListener, Handler: handler}
+                                        s.udp = &amp;dns.Server{PacketConn: udpConn, Handler: dns.HandlerFunc(s.handleUDP)}
+                                        s.tcp = &amp;dns.Server{Listener: tcpListener, Handler: dns.HandlerFunc(s.handleTCP)}
                                         go s.udp.ActivateAndServe()
                                         go s.tcp.ActivateAndServe()
                                 }</span> else<span class="cov0" title="0"> {
@@ -597,26 +601,37 @@ func (s *Server) Close() <span class="cov8" title="1">{
         }</span>
 }
 
-func (s *Server) handle(w dns.ResponseWriter, req *dns.Msg) <span class="cov8" title="1">{
+func (s *Server) handleUDP(w dns.ResponseWriter, req *dns.Msg) <span class="cov8" title="1">{
+        s.handle(w, req, "udp")
+}</span>
+
+func (s *Server) handleTCP(w dns.ResponseWriter, req *dns.Msg) <span class="cov8" title="1">{
+        s.handle(w, req, "tcp")
+}</span>
+
+func (s *Server) handle(w dns.ResponseWriter, req *dns.Msg, proto string) <span class="cov8" title="1">{
         for _, q := range req.Question </span><span class="cov8" title="1">{
-                if resp, ok := s.responses[NewKey(q.Name, q.Qtype)]; ok </span><span class="cov8" title="1">{
-                        if !resp.Drop </span><span class="cov8" title="1">{
-                                if resp.Delay &gt; 0 </span><span class="cov8" title="1">{
-                                        time.Sleep(resp.Delay)
-                                }</span>
-                                <span class="cov8" title="1">if resp.Raw != nil </span><span class="cov8" title="1">{
-                                        _, _ = w.Write(resp.Raw)
-                                }</span> else<span class="cov8" title="1"> {
-                                        m := new(dns.Msg)
-                                        if resp.Msg != nil </span><span class="cov8" title="1">{
-                                                resp.Msg.CopyTo(m)
+                for _, pro := range []string{proto, ""} </span><span class="cov8" title="1">{
+                        if resp, ok := s.responses[NewKey(q.Name, q.Qtype, pro)]; ok </span><span class="cov8" title="1">{
+                                if !resp.Drop </span><span class="cov8" title="1">{
+                                        if resp.Delay &gt; 0 </span><span class="cov8" title="1">{
+                                                time.Sleep(resp.Delay)
                                         }</span>
-                                        <span class="cov8" title="1">m.SetReply(req)
-                                        if resp.Rcode != dns.RcodeSuccess </span><span class="cov8" title="1">{
-                                                m.Rcode = resp.Rcode
-                                        }</span>
-                                        <span class="cov8" title="1">_ = w.WriteMsg(m)</span>
+                                        <span class="cov8" title="1">if resp.Raw != nil </span><span class="cov8" title="1">{
+                                                _, _ = w.Write(resp.Raw)
+                                        }</span> else<span class="cov8" title="1"> {
+                                                m := new(dns.Msg)
+                                                if resp.Msg != nil </span><span class="cov8" title="1">{
+                                                        resp.Msg.CopyTo(m)
+                                                }</span>
+                                                <span class="cov8" title="1">m.SetReply(req)
+                                                if resp.Rcode != dns.RcodeSuccess </span><span class="cov8" title="1">{
+                                                        m.Rcode = resp.Rcode
+                                                }</span>
+                                                <span class="cov8" title="1">_ = w.WriteMsg(m)</span>
+                                        }
                                 }
+                                <span class="cov8" title="1">break</span>
                         }
                 }
         }
