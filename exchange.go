@@ -16,6 +16,12 @@ func (ex Exchange) Difference(other Exchange) (reason string) {
 	if len(ex.Question) != len(other.Question) {
 		return "[]Question"
 	}
+	if ex.Rcode != other.Rcode {
+		return fmt.Sprintf("%s != %s", dns.RcodeToString[ex.Rcode], dns.RcodeToString[other.Rcode])
+	}
+	if ex.Rcode == dns.RcodeNameError || ex.Rcode == dns.RcodeServerFailure {
+		return ""
+	}
 	for i := range ex.Question {
 		if ex.Question[i].Name != other.Question[i].Name {
 			return fmt.Sprintf("Question[%v].Name %q != %q", i, ex.Question[i].Name, other.Question[i].Name)
@@ -23,12 +29,6 @@ func (ex Exchange) Difference(other Exchange) (reason string) {
 		if ex.Question[i].Qtype != other.Question[i].Qtype {
 			return fmt.Sprintf("Question[%v].Qtype %v != %v", i, ex.Question[i].Qtype, other.Question[i].Qtype)
 		}
-	}
-	if ex.Rcode != other.Rcode {
-		return fmt.Sprintf("%s != %s", dns.RcodeToString[ex.Rcode], dns.RcodeToString[other.Rcode])
-	}
-	if ex.Rcode == dns.RcodeNameError {
-		return ""
 	}
 	if len(ex.Answer) != len(other.Answer) {
 		return fmt.Sprintf("[%v]Answer != [%v]Answer", len(ex.Answer), len(other.Answer))
