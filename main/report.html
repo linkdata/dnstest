@@ -59,7 +59,7 @@
 				
 				<option value="file1">github.com/linkdata/dnstest/key.go (100.0%)</option>
 				
-				<option value="file2">github.com/linkdata/dnstest/network.go (0.0%)</option>
+				<option value="file2">github.com/linkdata/dnstest/network.go (78.8%)</option>
 				
 				<option value="file3">github.com/linkdata/dnstest/parsedigoutput.go (98.5%)</option>
 				
@@ -163,7 +163,11 @@ func NewKey(qname string, qtype uint16, proto ...string) (k Key) <span class="co
 
 import (
         "context"
+        "fmt"
         "net"
+        "sort"
+        "strconv"
+        "strings"
 
         "github.com/miekg/dns"
         "golang.org/x/net/proxy"
@@ -172,33 +176,275 @@ import (
 var _ proxy.ContextDialer = &amp;Network{}
 
 type Network struct {
+        dialer        proxy.ContextDialer
+        remotes       map[string]*Server  // canonical remote addr -&gt; simulated server
+        nameToRemotes map[string][]string // canonical domain -&gt; remote addrs
+        aliases       map[string]string   // alias addr -&gt; canonical remote addr
 }
 
-func NewNetwork(exchs []Exchange) (nw *Network, err error) <span class="cov0" title="0">{
-        aSet := map[string]map[string]struct{}{} // A record qname -&gt; set of IPs
-        nsSet := map[string]struct{}{}           // NS records
-        for _, exch := range exchs </span><span class="cov0" title="0">{
-                for _, rrs := range [][]dns.RR{exch.Answer, exch.Ns, exch.Answer} </span><span class="cov0" title="0">{
-                        for _, rr := range rrs </span><span class="cov0" title="0">{
+func NewNetwork(exchs []Exchange) (nw *Network, err error) <span class="cov8" title="1">{
+        aSet := map[string]map[string]struct{}{}        // qname -&gt; set of IPs
+        ipToRemotes := map[string]map[string]struct{}{} // ip -&gt; set of remote addrs
+        nameToRemoteSet := map[string]map[string]struct{}{}
+        remoteResponses := map[string]map[Key]*Response{}
+        aliasCandidates := map[string]string{}
+
+        for _, exch := range exchs </span><span class="cov8" title="1">{
+                if exch.Msg == nil || len(exch.Question) == 0 </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                <span class="cov8" title="1">remoteAddr, err := normalizeServerAddress(exch.Server)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+                <span class="cov8" title="1">alias := deriveAlias(exch.Server)
+                if alias != "" &amp;&amp; alias != remoteAddr </span><span class="cov8" title="1">{
+                        aliasCandidates[alias] = remoteAddr
+                }</span>
+                // Build response mapping per remote address.
+                <span class="cov8" title="1">if _, ok := remoteResponses[remoteAddr]; !ok </span><span class="cov8" title="1">{
+                        remoteResponses[remoteAddr] = make(map[Key]*Response)
+                }</span>
+                <span class="cov8" title="1">msgCopy := exch.Msg.Copy()
+                for _, q := range exch.Question </span><span class="cov8" title="1">{
+                        remoteResponses[remoteAddr][NewKey(q.Name, q.Qtype)] = &amp;Response{Msg: msgCopy}
+                }</span>
+
+                <span class="cov8" title="1">host, _, _ := net.SplitHostPort(remoteAddr)
+                ipHost := host
+                if alias != "" </span><span class="cov8" title="1">{
+                        if ah, _, err := net.SplitHostPort(alias); err == nil </span><span class="cov8" title="1">{
+                                ipHost = ah
+                        }</span>
+                }
+                <span class="cov8" title="1">if ip := canonicalIP(ipHost); ip != "" </span><span class="cov8" title="1">{
+                        addToSet(ipToRemotes, ip, remoteAddr)
+                }</span> else<span class="cov8" title="1"> {
+                        addToSet(nameToRemoteSet, normalizeDomain(host), remoteAddr)
+                }</span>
+
+                <span class="cov8" title="1">for _, rrs := range [][]dns.RR{exch.Answer, exch.Ns, exch.Extra} </span><span class="cov8" title="1">{
+                        for _, rr := range rrs </span><span class="cov8" title="1">{
                                 qname := dns.CanonicalName(rr.Header().Name)
                                 switch rr := rr.(type) </span>{
-                                case *dns.A:<span class="cov0" title="0">
-                                        aSet[qname][rr.A.String()] = struct{}{}</span>
-                                case *dns.AAAA:<span class="cov0" title="0">
-                                        aSet[qname][rr.AAAA.String()] = struct{}{}</span>
-                                case *dns.NS:<span class="cov0" title="0">
-                                        nsSet[dns.CanonicalName(rr.Ns)] = struct{}{}</span>
+                                case *dns.A:<span class="cov8" title="1">
+                                        addToSet(aSet, qname, rr.A.String())</span>
+                                case *dns.AAAA:<span class="cov8" title="1">
+                                        addToSet(aSet, qname, rr.AAAA.String())</span>
                                 }
                         }
                 }
         }
 
-        <span class="cov0" title="0">return</span>
+        <span class="cov8" title="1">nw = &amp;Network{
+                dialer:        &amp;net.Dialer{},
+                remotes:       make(map[string]*Server),
+                nameToRemotes: make(map[string][]string),
+                aliases:       make(map[string]string),
+        }
+
+        // Helper to close already created servers when returning early.
+        closeAll := func() </span><span class="cov0" title="0">{
+                for _, srv := range nw.remotes </span><span class="cov0" title="0">{
+                        srv.Close()
+                }</span>
+        }
+
+        <span class="cov8" title="1">for remoteAddr, responses := range remoteResponses </span><span class="cov8" title="1">{
+                if len(responses) == 0 </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+                <span class="cov8" title="1">srv, err := NewServer(responses)
+                if err != nil </span><span class="cov0" title="0">{
+                        closeAll()
+                        return nil, err
+                }</span>
+                <span class="cov8" title="1">nw.remotes[remoteAddr] = srv</span>
+        }
+        <span class="cov8" title="1">for alias, remoteAddr := range aliasCandidates </span><span class="cov8" title="1">{
+                if _, ok := nw.remotes[remoteAddr]; ok </span><span class="cov8" title="1">{
+                        nw.aliases[alias] = remoteAddr
+                }</span>
+        }
+
+        // Build domain -&gt; remote mapping from recorded A/AAAA data.
+        <span class="cov8" title="1">for name, ipSet := range aSet </span><span class="cov8" title="1">{
+                canonicalName := normalizeDomain(name)
+                for ip := range ipSet </span><span class="cov8" title="1">{
+                        for remoteAddr := range ipToRemotes[ip] </span><span class="cov8" title="1">{
+                                if _, ok := nw.remotes[remoteAddr]; ok </span><span class="cov8" title="1">{
+                                        addToSet(nameToRemoteSet, canonicalName, remoteAddr)
+                                }</span>
+                        }
+                }
+        }
+
+        <span class="cov8" title="1">for name, remoteSet := range nameToRemoteSet </span><span class="cov8" title="1">{
+                var remotes []string
+                for remoteAddr := range remoteSet </span><span class="cov8" title="1">{
+                        if _, ok := nw.remotes[remoteAddr]; ok </span><span class="cov8" title="1">{
+                                remotes = append(remotes, remoteAddr)
+                        }</span>
+                }
+                <span class="cov8" title="1">if len(remotes) &gt; 0 </span><span class="cov8" title="1">{
+                        sort.Strings(remotes)
+                        nw.nameToRemotes[name] = remotes
+                }</span>
+        }
+
+        <span class="cov8" title="1">return nw, nil</span>
 }
 
-func (n *Network) DialContext(ctx context.Context, network string, address string) (conn net.Conn, err error) <span class="cov0" title="0">{
-        return
+func (n *Network) DialContext(ctx context.Context, network string, address string) (conn net.Conn, err error) <span class="cov8" title="1">{
+        if n == nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("dnstest: nil network")
+        }</span>
+        <span class="cov8" title="1">canonicalAddr, err := normalizeServerAddress(address)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">if srv, ok := n.remotes[canonicalAddr]; ok </span><span class="cov8" title="1">{
+                return n.dialer.DialContext(ctx, network, srv.Addr)
+        }</span>
+        <span class="cov8" title="1">if base, ok := n.aliases[canonicalAddr]; ok </span><span class="cov8" title="1">{
+                if srv, ok := n.remotes[base]; ok </span><span class="cov8" title="1">{
+                        return n.dialer.DialContext(ctx, network, srv.Addr)
+                }</span>
+        }
+
+        <span class="cov8" title="1">host, port, _ := net.SplitHostPort(canonicalAddr)
+        if ip := canonicalIP(host); ip != "" </span><span class="cov8" title="1">{
+                if srv, ok := n.remotes[net.JoinHostPort(ip, port)]; ok </span><span class="cov0" title="0">{
+                        return n.dialer.DialContext(ctx, network, srv.Addr)
+                }</span>
+        }
+        <span class="cov8" title="1">name := normalizeDomain(host)
+        if remotes := n.nameToRemotes[name]; len(remotes) &gt; 0 </span><span class="cov8" title="1">{
+                for _, remoteAddr := range remotes </span><span class="cov8" title="1">{
+                        if _, rport, err := net.SplitHostPort(remoteAddr); err == nil &amp;&amp; rport == port </span><span class="cov8" title="1">{
+                                if srv, ok := n.remotes[remoteAddr]; ok </span><span class="cov8" title="1">{
+                                        return n.dialer.DialContext(ctx, network, srv.Addr)
+                                }</span>
+                        }
+                }
+        }
+        <span class="cov8" title="1">return nil, fmt.Errorf("dnstest: no simulated server for %q", address)</span>
+}
+
+// Close shuts down all simulated servers created for the network.
+func (n *Network) Close() <span class="cov8" title="1">{
+        if n == nil </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov8" title="1">for _, srv := range n.remotes </span><span class="cov8" title="1">{
+                srv.Close()
+        }</span>
+}
+
+func addToSet(m map[string]map[string]struct{}, key, value string) <span class="cov8" title="1">{
+        if key == "" || value == "" </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov8" title="1">if _, ok := m[key]; !ok </span><span class="cov8" title="1">{
+                m[key] = make(map[string]struct{})
+        }</span>
+        <span class="cov8" title="1">m[key][value] = struct{}{}</span>
+}
+
+func deriveAlias(server string) string <span class="cov8" title="1">{
+        server = strings.TrimSpace(server)
+        if server == "" || strings.Contains(server, "[") </span><span class="cov0" title="0">{
+                return ""
+        }</span>
+        <span class="cov8" title="1">idx := strings.LastIndex(server, ":")
+        if idx &lt;= 0 </span><span class="cov8" title="1">{
+                return ""
+        }</span>
+        <span class="cov8" title="1">hostPart := server[:idx]
+        portPart := server[idx+1:]
+        p, err := normalizePort(portPart)
+        if err != nil </span><span class="cov0" title="0">{
+                return ""
+        }</span>
+        <span class="cov8" title="1">if ip := canonicalIP(hostPart); ip != "" </span><span class="cov8" title="1">{
+                return net.JoinHostPort(ip, p)
+        }</span>
+        <span class="cov8" title="1">return ""</span>
+}
+
+func normalizeServerAddress(addr string) (string, error) <span class="cov8" title="1">{
+        addr = strings.TrimSpace(addr)
+        if addr == "" </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("dnstest: empty address")
+        }</span>
+
+        <span class="cov8" title="1">if host, port, err := net.SplitHostPort(addr); err == nil </span><span class="cov8" title="1">{
+                host = normalizeHost(host)
+                p, err := normalizePort(port)
+                if err != nil </span><span class="cov0" title="0">{
+                        return "", err
+                }</span>
+                <span class="cov8" title="1">return net.JoinHostPort(host, p), nil</span>
+        }
+
+        <span class="cov8" title="1">if ip := canonicalIP(addr); ip != "" </span><span class="cov8" title="1">{
+                return net.JoinHostPort(ip, "53"), nil
+        }</span>
+
+        // Handle IPv6 addresses without brackets but with port appended.
+        <span class="cov0" title="0">if idx := strings.LastIndex(addr, ":"); idx &gt; 0 </span><span class="cov0" title="0">{
+                hostPart := addr[:idx]
+                portPart := addr[idx+1:]
+                if ip := canonicalIP(hostPart); ip != "" </span><span class="cov0" title="0">{
+                        p, err := normalizePort(portPart)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return "", err
+                        }</span>
+                        <span class="cov0" title="0">return net.JoinHostPort(ip, p), nil</span>
+                }
+        }
+
+        <span class="cov0" title="0">if strings.Contains(addr, ":") </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("dnstest: invalid address %q", addr)
+        }</span>
+
+        <span class="cov0" title="0">host := normalizeDomain(addr)
+        return net.JoinHostPort(host, "53"), nil</span>
+}
+
+func normalizeHost(host string) string <span class="cov8" title="1">{
+        if ip := canonicalIP(host); ip != "" </span><span class="cov8" title="1">{
+                return ip
+        }</span>
+        <span class="cov8" title="1">return normalizeDomain(host)</span>
+}
+
+func normalizeDomain(host string) string <span class="cov8" title="1">{
+        return strings.TrimSuffix(strings.ToLower(strings.TrimSpace(host)), ".")
 }</span>
+
+func canonicalIP(host string) string <span class="cov8" title="1">{
+        h := strings.Trim(host, "[]")
+        if i := strings.IndexByte(h, '%'); i &gt;= 0 </span><span class="cov0" title="0">{
+                h = h[:i]
+        }</span>
+        <span class="cov8" title="1">if ip := net.ParseIP(h); ip != nil </span><span class="cov8" title="1">{
+                return ip.String()
+        }</span>
+        <span class="cov8" title="1">return ""</span>
+}
+
+func normalizePort(port string) (string, error) <span class="cov8" title="1">{
+        port = strings.TrimSpace(port)
+        if port == "" </span><span class="cov0" title="0">{
+                return "53", nil
+        }</span>
+        <span class="cov8" title="1">if n, err := strconv.ParseUint(port, 10, 16); err == nil </span><span class="cov8" title="1">{
+                return strconv.FormatUint(n, 10), nil
+        }</span>
+        <span class="cov0" title="0">return "", fmt.Errorf("dnstest: invalid port %q", port)</span>
+}
 </pre>
 		
 		<pre class="file" id="file3" style="display: none">package dnstest
