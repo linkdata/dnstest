@@ -27,93 +27,86 @@ func NewNetwork(exchs []Exchange) (nw *Network, err error) {
 	nameToRemoteSet := map[string]map[string]struct{}{}
 	remoteResponses := map[string]map[Key]*Response{}
 	aliasCandidates := map[string]string{}
-
-	for _, exch := range exchs {
-		if exch.Msg == nil || len(exch.Question) == 0 {
-			continue
-		}
-
-		remoteAddr, err := normalizeServerAddress(exch.Server)
-		if err != nil {
-			return nil, err
-		}
-		alias := deriveAlias(exch.Server)
-		if alias != "" && alias != remoteAddr {
-			aliasCandidates[alias] = remoteAddr
-		}
-		// Build response mapping per remote address.
-		if _, ok := remoteResponses[remoteAddr]; !ok {
-			remoteResponses[remoteAddr] = make(map[Key]*Response)
-		}
-		errText := strings.TrimSpace(exch.Error)
-		for _, q := range exch.Question {
-			resp := &Response{}
-			if errText != "" {
-				resp.Drop = true
-			} else {
-				msgCopy := exch.Msg.Copy()
-				resp.Msg = msgCopy
-				if msgCopy.Rcode != dns.RcodeSuccess {
-					resp.Rcode = msgCopy.Rcode
-				}
-			}
-			remoteResponses[remoteAddr][NewKey(q.Name, q.Qtype)] = resp
-		}
-
-		host, _, _ := net.SplitHostPort(remoteAddr)
-		ipHost := host
-		if alias != "" {
-			if ah, _, err := net.SplitHostPort(alias); err == nil {
-				ipHost = ah
-			}
-		}
-		if ip := canonicalIP(ipHost); ip != "" {
-			addToSet(ipToRemotes, ip, remoteAddr)
-		} else {
-			addToSet(nameToRemoteSet, normalizeDomain(host), remoteAddr)
-		}
-
-		for _, rrs := range [][]dns.RR{exch.Answer, exch.Ns, exch.Extra} {
-			for _, rr := range rrs {
-				qname := dns.CanonicalName(rr.Header().Name)
-				switch rr := rr.(type) {
-				case *dns.A:
-					addToSet(aSet, qname, rr.A.String())
-				case *dns.AAAA:
-					addToSet(aSet, qname, rr.AAAA.String())
-				}
-			}
-		}
-	}
-
-	nw = &Network{
-		dialer:        &net.Dialer{},
-		remotes:       make(map[string]*Server),
-		nameToRemotes: make(map[string][]string),
-		aliases:       make(map[string]string),
-	}
+	remotes := map[string]*Server{}
+	aliases := map[string]string{}
 
 	// Helper to close already created servers when returning early.
-	closeAll := func() {
-		for _, srv := range nw.remotes {
-			srv.Close()
+	defer func() {
+		if err != nil {
+			for _, srv := range remotes {
+				srv.Close()
+			}
+		}
+	}()
+
+	for _, exch := range exchs {
+		if exch.Msg != nil && len(exch.Question) > 0 {
+			remoteAddr, err := normalizeServerAddress(exch.Server)
+			if err != nil {
+				return nil, err
+			}
+			alias := deriveAlias(exch.Server)
+			if alias != "" && alias != remoteAddr {
+				aliasCandidates[alias] = remoteAddr
+			}
+			// Build response mapping per remote address.
+			if _, ok := remoteResponses[remoteAddr]; !ok {
+				remoteResponses[remoteAddr] = make(map[Key]*Response)
+			}
+			errText := strings.TrimSpace(exch.Error)
+			for _, q := range exch.Question {
+				resp := &Response{}
+				if errText != "" {
+					resp.Drop = true
+				} else {
+					msgCopy := exch.Msg.Copy()
+					resp.Msg = msgCopy
+					if msgCopy.Rcode != dns.RcodeSuccess {
+						resp.Rcode = msgCopy.Rcode
+					}
+				}
+				remoteResponses[remoteAddr][NewKey(q.Name, q.Qtype)] = resp
+			}
+
+			host, _, _ := net.SplitHostPort(remoteAddr)
+			ipHost := host
+			if alias != "" {
+				if ah, _, err := net.SplitHostPort(alias); err == nil {
+					ipHost = ah
+				}
+			}
+			if ip := canonicalIP(ipHost); ip != "" {
+				addToSet(ipToRemotes, ip, remoteAddr)
+			} else {
+				addToSet(nameToRemoteSet, normalizeDomain(host), remoteAddr)
+			}
+
+			for _, rrs := range [][]dns.RR{exch.Answer, exch.Ns, exch.Extra} {
+				for _, rr := range rrs {
+					qname := dns.CanonicalName(rr.Header().Name)
+					switch rr := rr.(type) {
+					case *dns.A:
+						addToSet(aSet, qname, rr.A.String())
+					case *dns.AAAA:
+						addToSet(aSet, qname, rr.AAAA.String())
+					}
+				}
+			}
 		}
 	}
 
 	for remoteAddr, responses := range remoteResponses {
-		if len(responses) == 0 {
-			continue
+		if len(responses) > 0 {
+			var srv *Server
+			if srv, err = NewServer(responses); err != nil {
+				return
+			}
+			remotes[remoteAddr] = srv
 		}
-		srv, err := NewServer(responses)
-		if err != nil {
-			closeAll()
-			return nil, err
-		}
-		nw.remotes[remoteAddr] = srv
 	}
 	for alias, remoteAddr := range aliasCandidates {
-		if _, ok := nw.remotes[remoteAddr]; ok {
-			nw.aliases[alias] = remoteAddr
+		if _, ok := remotes[remoteAddr]; ok {
+			aliases[alias] = remoteAddr
 		}
 	}
 
@@ -122,27 +115,34 @@ func NewNetwork(exchs []Exchange) (nw *Network, err error) {
 		canonicalName := normalizeDomain(name)
 		for ip := range ipSet {
 			for remoteAddr := range ipToRemotes[ip] {
-				if _, ok := nw.remotes[remoteAddr]; ok {
+				if _, ok := remotes[remoteAddr]; ok {
 					addToSet(nameToRemoteSet, canonicalName, remoteAddr)
 				}
 			}
 		}
 	}
 
+	nw = &Network{
+		dialer:        &net.Dialer{},
+		remotes:       remotes,
+		nameToRemotes: make(map[string][]string),
+		aliases:       aliases,
+	}
+
 	for name, remoteSet := range nameToRemoteSet {
-		var remotes []string
+		var remotesList []string
 		for remoteAddr := range remoteSet {
 			if _, ok := nw.remotes[remoteAddr]; ok {
-				remotes = append(remotes, remoteAddr)
+				remotesList = append(remotesList, remoteAddr)
 			}
 		}
-		if len(remotes) > 0 {
-			sort.Strings(remotes)
-			nw.nameToRemotes[name] = remotes
+		if len(remotesList) > 0 {
+			sort.Strings(remotesList)
+			nw.nameToRemotes[name] = remotesList
 		}
 	}
 
-	return nw, nil
+	return
 }
 
 func (n *Network) DialContext(ctx context.Context, network string, address string) (conn net.Conn, err error) {
