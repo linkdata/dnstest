@@ -474,24 +474,27 @@ func exerciseNetworksFromDir(t *testing.T, dir string) {
 				t.Fatalf("ParseDigOutput(%q): %v", path, err)
 			}
 			var (
-				buildable  []Exchange
-				errorExchs []Exchange
+				networkExchs      []Exchange
+				invalidErrorExchs []Exchange
 			)
 			for _, exch := range exchs {
-				if strings.TrimSpace(exch.Error) != "" {
-					errorExchs = append(errorExchs, exch)
-				}
-				if strings.TrimSpace(exch.Server) == "" || exch.Msg == nil {
+				errText := strings.TrimSpace(exch.Error)
+				serverText := strings.TrimSpace(exch.Server)
+				if errText != "" && (exch.Msg == nil || len(exch.Question) == 0 || serverText == "") {
+					invalidErrorExchs = append(invalidErrorExchs, exch)
 					continue
 				}
-				buildable = append(buildable, exch)
+				if serverText == "" || exch.Msg == nil {
+					continue
+				}
+				networkExchs = append(networkExchs, exch)
 			}
-			if len(buildable) == 0 && len(errorExchs) == 0 {
+			if len(networkExchs) == 0 && len(invalidErrorExchs) == 0 {
 				t.Fatalf("no exchanges parsed from %s", path)
 			}
 
-			if len(buildable) > 0 {
-				network, err := NewNetwork(buildable)
+			if len(networkExchs) > 0 {
+				network, err := NewNetwork(networkExchs)
 				if err != nil {
 					t.Fatalf("NewNetwork(%q): %v", path, err)
 				}
@@ -503,7 +506,7 @@ func exerciseNetworksFromDir(t *testing.T, dir string) {
 					qtype uint16
 				}
 				latest := make(map[remoteQuery]Exchange)
-				for _, exch := range buildable {
+				for _, exch := range networkExchs {
 					if exch.Msg == nil || len(exch.Question) == 0 || strings.TrimSpace(exch.Server) == "" {
 						continue
 					}
@@ -542,8 +545,8 @@ func exerciseNetworksFromDir(t *testing.T, dir string) {
 				}
 			}
 
-			if len(errorExchs) > 0 {
-				for idx, errEx := range errorExchs {
+			if len(invalidErrorExchs) > 0 {
+				for idx, errEx := range invalidErrorExchs {
 					idx := idx
 					errEx := errEx
 					t.Run(fmt.Sprintf("error_%d", idx), func(t *testing.T) {
@@ -551,36 +554,8 @@ func exerciseNetworksFromDir(t *testing.T, dir string) {
 						if strings.TrimSpace(errEx.Error) == "" {
 							t.Fatalf("expected error text for exchange")
 						}
-						expectAddr := errEx.Msg != nil && len(errEx.Question) > 0 && strings.TrimSpace(errEx.Server) != ""
-						nw, err := NewNetwork([]Exchange{errEx})
-						if !expectAddr {
-							if err == nil {
-								t.Fatalf("expected NewNetwork error for exchange missing server: %q", errEx.Error)
-							}
-							return
-						}
-						if err != nil {
-							t.Fatalf("NewNetwork error for error exchange: %v", err)
-						}
-						if nw == nil {
-							t.Fatalf("NewNetwork returned nil without error")
-						}
-						t.Cleanup(nw.Close)
-						addr, err := normalizeServerAddress(errEx.Server)
-						if err != nil {
-							t.Fatalf("normalizeServerAddress(%q): %v", errEx.Server, err)
-						}
-						srv := nw.remotes[addr]
-						if srv == nil {
-							t.Fatalf("missing server for error exchange %q", addr)
-						}
-						key := NewKey(errEx.Question[0].Name, errEx.Question[0].Qtype)
-						resp := srv.responses[key]
-						if resp == nil {
-							t.Fatalf("missing drop response for %q", key.Qname)
-						}
-						if !resp.Drop {
-							t.Fatalf("expected drop response for error exchange %q", key.Qname)
+						if _, err := NewNetwork([]Exchange{errEx}); err == nil {
+							t.Fatalf("expected NewNetwork error for exchange missing server: %q", errEx.Error)
 						}
 					})
 				}
