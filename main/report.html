@@ -59,7 +59,7 @@
 				
 				<option value="file1">github.com/linkdata/dnstest/key.go (100.0%)</option>
 				
-				<option value="file2">github.com/linkdata/dnstest/network.go (80.8%)</option>
+				<option value="file2">github.com/linkdata/dnstest/network.go (83.3%)</option>
 				
 				<option value="file3">github.com/linkdata/dnstest/parsedigoutput.go (98.5%)</option>
 				
@@ -188,93 +188,86 @@ func NewNetwork(exchs []Exchange) (nw *Network, err error) <span class="cov8" ti
         nameToRemoteSet := map[string]map[string]struct{}{}
         remoteResponses := map[string]map[Key]*Response{}
         aliasCandidates := map[string]string{}
+        remotes := map[string]*Server{}
+        aliases := map[string]string{}
 
-        for _, exch := range exchs </span><span class="cov8" title="1">{
-                if exch.Msg == nil || len(exch.Question) == 0 </span><span class="cov0" title="0">{
-                        continue</span>
-                }
-
-                <span class="cov8" title="1">remoteAddr, err := normalizeServerAddress(exch.Server)
+        // Helper to close already created servers when returning early.
+        defer func() </span><span class="cov8" title="1">{
                 if err != nil </span><span class="cov8" title="1">{
-                        return nil, err
-                }</span>
-                <span class="cov8" title="1">alias := deriveAlias(exch.Server)
-                if alias != "" &amp;&amp; alias != remoteAddr </span><span class="cov8" title="1">{
-                        aliasCandidates[alias] = remoteAddr
-                }</span>
-                // Build response mapping per remote address.
-                <span class="cov8" title="1">if _, ok := remoteResponses[remoteAddr]; !ok </span><span class="cov8" title="1">{
-                        remoteResponses[remoteAddr] = make(map[Key]*Response)
-                }</span>
-                <span class="cov8" title="1">errText := strings.TrimSpace(exch.Error)
-                for _, q := range exch.Question </span><span class="cov8" title="1">{
-                        resp := &amp;Response{}
-                        if errText != "" </span><span class="cov8" title="1">{
-                                resp.Drop = true
-                        }</span> else<span class="cov8" title="1"> {
-                                msgCopy := exch.Msg.Copy()
-                                resp.Msg = msgCopy
-                                if msgCopy.Rcode != dns.RcodeSuccess </span><span class="cov8" title="1">{
-                                        resp.Rcode = msgCopy.Rcode
-                                }</span>
-                        }
-                        <span class="cov8" title="1">remoteResponses[remoteAddr][NewKey(q.Name, q.Qtype)] = resp</span>
-                }
-
-                <span class="cov8" title="1">host, _, _ := net.SplitHostPort(remoteAddr)
-                ipHost := host
-                if alias != "" </span><span class="cov8" title="1">{
-                        if ah, _, err := net.SplitHostPort(alias); err == nil </span><span class="cov8" title="1">{
-                                ipHost = ah
+                        for _, srv := range remotes </span><span class="cov0" title="0">{
+                                srv.Close()
                         }</span>
                 }
-                <span class="cov8" title="1">if ip := canonicalIP(ipHost); ip != "" </span><span class="cov8" title="1">{
-                        addToSet(ipToRemotes, ip, remoteAddr)
-                }</span> else<span class="cov8" title="1"> {
-                        addToSet(nameToRemoteSet, normalizeDomain(host), remoteAddr)
-                }</span>
+        }()
 
-                <span class="cov8" title="1">for _, rrs := range [][]dns.RR{exch.Answer, exch.Ns, exch.Extra} </span><span class="cov8" title="1">{
-                        for _, rr := range rrs </span><span class="cov8" title="1">{
-                                qname := dns.CanonicalName(rr.Header().Name)
-                                switch rr := rr.(type) </span>{
-                                case *dns.A:<span class="cov8" title="1">
-                                        addToSet(aSet, qname, rr.A.String())</span>
-                                case *dns.AAAA:<span class="cov8" title="1">
-                                        addToSet(aSet, qname, rr.AAAA.String())</span>
+        <span class="cov8" title="1">for _, exch := range exchs </span><span class="cov8" title="1">{
+                if exch.Msg != nil &amp;&amp; len(exch.Question) &gt; 0 </span><span class="cov8" title="1">{
+                        remoteAddr, err := normalizeServerAddress(exch.Server)
+                        if err != nil </span><span class="cov8" title="1">{
+                                return nil, err
+                        }</span>
+                        <span class="cov8" title="1">alias := deriveAlias(exch.Server)
+                        if alias != "" &amp;&amp; alias != remoteAddr </span><span class="cov8" title="1">{
+                                aliasCandidates[alias] = remoteAddr
+                        }</span>
+                        // Build response mapping per remote address.
+                        <span class="cov8" title="1">if _, ok := remoteResponses[remoteAddr]; !ok </span><span class="cov8" title="1">{
+                                remoteResponses[remoteAddr] = make(map[Key]*Response)
+                        }</span>
+                        <span class="cov8" title="1">errText := strings.TrimSpace(exch.Error)
+                        for _, q := range exch.Question </span><span class="cov8" title="1">{
+                                resp := &amp;Response{}
+                                if errText != "" </span><span class="cov8" title="1">{
+                                        resp.Drop = true
+                                }</span> else<span class="cov8" title="1"> {
+                                        msgCopy := exch.Msg.Copy()
+                                        resp.Msg = msgCopy
+                                        if msgCopy.Rcode != dns.RcodeSuccess </span><span class="cov8" title="1">{
+                                                resp.Rcode = msgCopy.Rcode
+                                        }</span>
+                                }
+                                <span class="cov8" title="1">remoteResponses[remoteAddr][NewKey(q.Name, q.Qtype)] = resp</span>
+                        }
+
+                        <span class="cov8" title="1">host, _, _ := net.SplitHostPort(remoteAddr)
+                        ipHost := host
+                        if alias != "" </span><span class="cov8" title="1">{
+                                if ah, _, err := net.SplitHostPort(alias); err == nil </span><span class="cov8" title="1">{
+                                        ipHost = ah
+                                }</span>
+                        }
+                        <span class="cov8" title="1">if ip := canonicalIP(ipHost); ip != "" </span><span class="cov8" title="1">{
+                                addToSet(ipToRemotes, ip, remoteAddr)
+                        }</span> else<span class="cov8" title="1"> {
+                                addToSet(nameToRemoteSet, normalizeDomain(host), remoteAddr)
+                        }</span>
+
+                        <span class="cov8" title="1">for _, rrs := range [][]dns.RR{exch.Answer, exch.Ns, exch.Extra} </span><span class="cov8" title="1">{
+                                for _, rr := range rrs </span><span class="cov8" title="1">{
+                                        qname := dns.CanonicalName(rr.Header().Name)
+                                        switch rr := rr.(type) </span>{
+                                        case *dns.A:<span class="cov8" title="1">
+                                                addToSet(aSet, qname, rr.A.String())</span>
+                                        case *dns.AAAA:<span class="cov8" title="1">
+                                                addToSet(aSet, qname, rr.AAAA.String())</span>
+                                        }
                                 }
                         }
                 }
         }
 
-        <span class="cov8" title="1">nw = &amp;Network{
-                dialer:        &amp;net.Dialer{},
-                remotes:       make(map[string]*Server),
-                nameToRemotes: make(map[string][]string),
-                aliases:       make(map[string]string),
-        }
-
-        // Helper to close already created servers when returning early.
-        closeAll := func() </span><span class="cov0" title="0">{
-                for _, srv := range nw.remotes </span><span class="cov0" title="0">{
-                        srv.Close()
-                }</span>
-        }
-
         <span class="cov8" title="1">for remoteAddr, responses := range remoteResponses </span><span class="cov8" title="1">{
-                if len(responses) == 0 </span><span class="cov0" title="0">{
-                        continue</span>
+                if len(responses) &gt; 0 </span><span class="cov8" title="1">{
+                        var srv *Server
+                        if srv, err = NewServer(responses); err != nil </span><span class="cov0" title="0">{
+                                return
+                        }</span>
+                        <span class="cov8" title="1">remotes[remoteAddr] = srv</span>
                 }
-                <span class="cov8" title="1">srv, err := NewServer(responses)
-                if err != nil </span><span class="cov0" title="0">{
-                        closeAll()
-                        return nil, err
-                }</span>
-                <span class="cov8" title="1">nw.remotes[remoteAddr] = srv</span>
         }
         <span class="cov8" title="1">for alias, remoteAddr := range aliasCandidates </span><span class="cov8" title="1">{
-                if _, ok := nw.remotes[remoteAddr]; ok </span><span class="cov8" title="1">{
-                        nw.aliases[alias] = remoteAddr
+                if _, ok := remotes[remoteAddr]; ok </span><span class="cov8" title="1">{
+                        aliases[alias] = remoteAddr
                 }</span>
         }
 
@@ -283,27 +276,34 @@ func NewNetwork(exchs []Exchange) (nw *Network, err error) <span class="cov8" ti
                 canonicalName := normalizeDomain(name)
                 for ip := range ipSet </span><span class="cov8" title="1">{
                         for remoteAddr := range ipToRemotes[ip] </span><span class="cov8" title="1">{
-                                if _, ok := nw.remotes[remoteAddr]; ok </span><span class="cov8" title="1">{
+                                if _, ok := remotes[remoteAddr]; ok </span><span class="cov8" title="1">{
                                         addToSet(nameToRemoteSet, canonicalName, remoteAddr)
                                 }</span>
                         }
                 }
         }
 
-        <span class="cov8" title="1">for name, remoteSet := range nameToRemoteSet </span><span class="cov8" title="1">{
-                var remotes []string
+        <span class="cov8" title="1">nw = &amp;Network{
+                dialer:        &amp;net.Dialer{},
+                remotes:       remotes,
+                nameToRemotes: make(map[string][]string),
+                aliases:       aliases,
+        }
+
+        for name, remoteSet := range nameToRemoteSet </span><span class="cov8" title="1">{
+                var remotesList []string
                 for remoteAddr := range remoteSet </span><span class="cov8" title="1">{
                         if _, ok := nw.remotes[remoteAddr]; ok </span><span class="cov8" title="1">{
-                                remotes = append(remotes, remoteAddr)
+                                remotesList = append(remotesList, remoteAddr)
                         }</span>
                 }
-                <span class="cov8" title="1">if len(remotes) &gt; 0 </span><span class="cov8" title="1">{
-                        sort.Strings(remotes)
-                        nw.nameToRemotes[name] = remotes
+                <span class="cov8" title="1">if len(remotesList) &gt; 0 </span><span class="cov8" title="1">{
+                        sort.Strings(remotesList)
+                        nw.nameToRemotes[name] = remotesList
                 }</span>
         }
 
-        <span class="cov8" title="1">return nw, nil</span>
+        <span class="cov8" title="1">return</span>
 }
 
 func (n *Network) DialContext(ctx context.Context, network string, address string) (conn net.Conn, err error) <span class="cov8" title="1">{
