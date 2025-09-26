@@ -264,7 +264,11 @@ func normalizeHost(host string) string {
 }
 
 func normalizeDomain(host string) string {
-	return strings.TrimSuffix(strings.ToLower(strings.TrimSpace(host)), ".")
+	host = strings.TrimSpace(host)
+	if host == "" {
+		return ""
+	}
+	return strings.TrimSuffix(dns.CanonicalName(host), ".")
 }
 
 func canonicalIP(host string) string {
