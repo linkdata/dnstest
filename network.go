@@ -45,11 +45,17 @@ func NewNetwork(exchs []Exchange) (nw *Network, err error) {
 		if _, ok := remoteResponses[remoteAddr]; !ok {
 			remoteResponses[remoteAddr] = make(map[Key]*Response)
 		}
-		msgCopy := exch.Msg.Copy()
+		errText := strings.TrimSpace(exch.Error)
 		for _, q := range exch.Question {
-			resp := &Response{Msg: msgCopy}
-			if msgCopy.Rcode != dns.RcodeSuccess {
-				resp.Rcode = msgCopy.Rcode
+			resp := &Response{}
+			if errText != "" {
+				resp.Drop = true
+			} else {
+				msgCopy := exch.Msg.Copy()
+				resp.Msg = msgCopy
+				if msgCopy.Rcode != dns.RcodeSuccess {
+					resp.Rcode = msgCopy.Rcode
+				}
 			}
 			remoteResponses[remoteAddr][NewKey(q.Name, q.Qtype)] = resp
 		}

@@ -473,50 +473,117 @@ func exerciseNetworksFromDir(t *testing.T, dir string) {
 			if err != nil {
 				t.Fatalf("ParseDigOutput(%q): %v", path, err)
 			}
-			var filtered []Exchange
+			var (
+				buildable  []Exchange
+				errorExchs []Exchange
+			)
 			for _, exch := range exchs {
+				if strings.TrimSpace(exch.Error) != "" {
+					errorExchs = append(errorExchs, exch)
+				}
 				if strings.TrimSpace(exch.Server) == "" || exch.Msg == nil {
 					continue
 				}
-				filtered = append(filtered, exch)
+				buildable = append(buildable, exch)
 			}
-			if len(filtered) == 0 {
-				t.Fatalf("no usable exchanges parsed from %s", path)
+			if len(buildable) == 0 && len(errorExchs) == 0 {
+				t.Fatalf("no exchanges parsed from %s", path)
 			}
 
-			network, err := NewNetwork(filtered)
-			if err != nil {
-				t.Fatalf("NewNetwork(%q): %v", path, err)
-			}
-			t.Cleanup(network.Close)
-
-			lastIdx := -1
-			for i := len(filtered) - 1; i >= 0; i-- {
-				ex := filtered[i]
-				if ex.Msg == nil || len(ex.Question) == 0 || strings.TrimSpace(ex.Server) == "" {
-					continue
+			if len(buildable) > 0 {
+				network, err := NewNetwork(buildable)
+				if err != nil {
+					t.Fatalf("NewNetwork(%q): %v", path, err)
 				}
-				lastIdx = i
-				break
-			}
-			if lastIdx == -1 {
-				t.Fatalf("no usable exchanges in %s", path)
-			}
+				t.Cleanup(network.Close)
 
-			exch := filtered[lastIdx]
-			addr, err := normalizeServerAddress(exch.Server)
-			if err != nil {
-				t.Fatalf("normalizeServerAddress(%q): %v", exch.Server, err)
-			}
-
-			resp := queryNetworkForExchange(t, network, addr, exch)
-			if diff := compareDNSMessages(exch.Msg, resp); diff != "" {
-				q := exch.Question[0]
-				qtype := dns.TypeToString[q.Qtype]
-				if qtype == "" {
-					qtype = fmt.Sprintf("TYPE%d", q.Qtype)
+				type remoteQuery struct {
+					addr  string
+					name  string
+					qtype uint16
 				}
-				t.Fatalf("%s final exchange mismatch for %s %s: %s", path, q.Name, qtype, diff)
+				latest := make(map[remoteQuery]Exchange)
+				for _, exch := range buildable {
+					if exch.Msg == nil || len(exch.Question) == 0 || strings.TrimSpace(exch.Server) == "" {
+						continue
+					}
+					addr, err := normalizeServerAddress(exch.Server)
+					if err != nil {
+						t.Fatalf("normalizeServerAddress(%q): %v", exch.Server, err)
+					}
+					q := exch.Question[0]
+					latest[remoteQuery{addr: addr, name: q.Name, qtype: q.Qtype}] = exch
+				}
+
+				for key, exch := range latest {
+					if strings.TrimSpace(exch.Error) != "" {
+						srv := network.remotes[key.addr]
+						if srv == nil {
+							t.Fatalf("missing server for drop exchange %q", key.addr)
+						}
+						resp := srv.responses[NewKey(key.name, key.qtype)]
+						if resp == nil {
+							t.Fatalf("missing response for drop exchange %q", key.name)
+						}
+						if !resp.Drop {
+							t.Fatalf("expected drop response for %q", key.name)
+						}
+						continue
+					}
+
+					resp := queryNetworkForExchange(t, network, key.addr, exch)
+					if diff := compareDNSMessages(exch.Msg, resp); diff != "" {
+						qtype := dns.TypeToString[key.qtype]
+						if qtype == "" {
+							qtype = fmt.Sprintf("TYPE%d", key.qtype)
+						}
+						t.Fatalf("%s exchange mismatch for %s %s: %s", path, key.name, qtype, diff)
+					}
+				}
+			}
+
+			if len(errorExchs) > 0 {
+				for idx, errEx := range errorExchs {
+					idx := idx
+					errEx := errEx
+					t.Run(fmt.Sprintf("error_%d", idx), func(t *testing.T) {
+						t.Helper()
+						if strings.TrimSpace(errEx.Error) == "" {
+							t.Fatalf("expected error text for exchange")
+						}
+						expectAddr := errEx.Msg != nil && len(errEx.Question) > 0 && strings.TrimSpace(errEx.Server) != ""
+						nw, err := NewNetwork([]Exchange{errEx})
+						if !expectAddr {
+							if err == nil {
+								t.Fatalf("expected NewNetwork error for exchange missing server: %q", errEx.Error)
+							}
+							return
+						}
+						if err != nil {
+							t.Fatalf("NewNetwork error for error exchange: %v", err)
+						}
+						if nw == nil {
+							t.Fatalf("NewNetwork returned nil without error")
+						}
+						t.Cleanup(nw.Close)
+						addr, err := normalizeServerAddress(errEx.Server)
+						if err != nil {
+							t.Fatalf("normalizeServerAddress(%q): %v", errEx.Server, err)
+						}
+						srv := nw.remotes[addr]
+						if srv == nil {
+							t.Fatalf("missing server for error exchange %q", addr)
+						}
+						key := NewKey(errEx.Question[0].Name, errEx.Question[0].Qtype)
+						resp := srv.responses[key]
+						if resp == nil {
+							t.Fatalf("missing drop response for %q", key.Qname)
+						}
+						if !resp.Drop {
+							t.Fatalf("expected drop response for error exchange %q", key.Qname)
+						}
+					})
+				}
 			}
 		})
 	}
