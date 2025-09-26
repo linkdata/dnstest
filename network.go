@@ -47,7 +47,11 @@ func NewNetwork(exchs []Exchange) (nw *Network, err error) {
 		}
 		msgCopy := exch.Msg.Copy()
 		for _, q := range exch.Question {
-			remoteResponses[remoteAddr][NewKey(q.Name, q.Qtype)] = &Response{Msg: msgCopy}
+			resp := &Response{Msg: msgCopy}
+			if msgCopy.Rcode != dns.RcodeSuccess {
+				resp.Rcode = msgCopy.Rcode
+			}
+			remoteResponses[remoteAddr][NewKey(q.Name, q.Qtype)] = resp
 		}
 
 		host, _, _ := net.SplitHostPort(remoteAddr)
