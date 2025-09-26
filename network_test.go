@@ -2,6 +2,7 @@ package dnstest
 
 import (
 	"context"
+	"net"
 	"testing"
 	"time"
 
@@ -11,59 +12,48 @@ import (
 func TestNetworkDialContext(t *testing.T) {
 	t.Parallel()
 
-	rrA := mustRR(t, "example.org. 300 IN A 192.0.2.5")
-	rrNS := mustRR(t, "example.org. 300 IN NS ns1.example.org.")
-	rrGlue := mustRR(t, "ns1.example.org. 300 IN A 192.0.2.1")
+	msgA, msgAAAA, msgTXT := networkTestMessages(t)
 
-	msgA := &dns.Msg{}
-	msgA.Id = 1234
-	msgA.Response = true
-	msgA.Authoritative = true
-	msgA.RecursionAvailable = true
-	msgA.Question = []dns.Question{{
-		Name:   dns.Fqdn("example.org"),
-		Qtype:  dns.TypeA,
-		Qclass: dns.ClassINET,
-	}}
-	msgA.Answer = []dns.RR{rrA}
-	msgA.Ns = []dns.RR{rrNS}
-	msgA.Extra = []dns.RR{rrGlue}
-
-	rrAAAA := mustRR(t, "ipv6.example. 300 IN AAAA 2001:db8::feed")
-	rrGlueV6 := mustRR(t, "ns2.example.org. 300 IN AAAA 2001:db8::10")
-	msgAAAA := &dns.Msg{}
-	msgAAAA.Id = 4321
-	msgAAAA.Response = true
-	msgAAAA.Authoritative = true
-	msgAAAA.Question = []dns.Question{{
-		Name:   dns.Fqdn("ipv6.example"),
-		Qtype:  dns.TypeAAAA,
-		Qclass: dns.ClassINET,
-	}}
-	msgAAAA.Answer = []dns.RR{rrAAAA}
-	msgAAAA.Extra = []dns.RR{rrGlueV6}
-
-	rrTXT := mustRR(t, "service.example. 60 IN TXT \"ok\"")
-	msgTXT := &dns.Msg{}
-	msgTXT.Id = 9999
-	msgTXT.Response = true
-	msgTXT.Authoritative = true
-	msgTXT.Question = []dns.Question{{
-		Name:   dns.Fqdn("service.example"),
-		Qtype:  dns.TypeTXT,
-		Qclass: dns.ClassINET,
-	}}
-	msgTXT.Answer = []dns.RR{rrTXT}
-
-	network, err := NewNetwork([]Exchange{
-		{Msg: msgA, Server: "192.0.2.1"},
-		{Msg: msgAAAA, Server: "2001:db8::10:53"},
-		{Msg: msgTXT, Server: "NS3.EXAMPLE.ORG:53"},
+	srvA, err := NewServer(map[Key]*Response{
+		NewKey("example.org.", dns.TypeA): {Msg: msgA},
 	})
 	if err != nil {
-		t.Fatalf("NewNetwork: %v", err)
+		t.Fatalf("NewServer IPv4: %v", err)
 	}
-	defer network.Close()
+
+	srvAAAA, err := NewServer(map[Key]*Response{
+		NewKey("ipv6.example.", dns.TypeAAAA): {Msg: msgAAAA},
+	})
+	if err != nil {
+		srvA.Close()
+		t.Fatalf("NewServer IPv6: %v", err)
+	}
+
+	srvTXT, err := NewServer(map[Key]*Response{
+		NewKey("service.example.", dns.TypeTXT): {Msg: msgTXT},
+	})
+	if err != nil {
+		srvA.Close()
+		srvAAAA.Close()
+		t.Fatalf("NewServer TXT: %v", err)
+	}
+
+	network := &Network{
+		dialer: &net.Dialer{},
+		remotes: map[string]*Server{
+			"192.0.2.1:53":         srvA,
+			"[2001:db8::10:53]:53": srvAAAA,
+			"ns3.example.org:53":   srvTXT,
+		},
+		nameToRemotes: map[string][]string{
+			"ns1.example.org": {"192.0.2.1:53"},
+			"ns2.example.org": {"[2001:db8::10:53]:53"},
+		},
+		aliases: map[string]string{
+			"[2001:db8::10]:53": "[2001:db8::10:53]:53",
+		},
+	}
+	t.Cleanup(network.Close)
 	if base, ok := network.aliases["[2001:db8::10]:53"]; !ok {
 		t.Fatalf("missing ipv6 alias mapping")
 	} else if base == "" || network.remotes[base] == nil {
@@ -103,6 +93,94 @@ func TestNetworkDialContext(t *testing.T) {
 	if _, err := network.DialContext(context.Background(), "udp", "unknown.example.org:53"); err == nil {
 		t.Fatalf("expected error for unknown name")
 	}
+}
+
+func TestNewNetworkFromExchanges(t *testing.T) {
+	t.Parallel()
+
+	msgA, msgAAAA, msgTXT := networkTestMessages(t)
+
+	network, err := NewNetwork([]Exchange{
+		{Msg: msgA, Server: "192.0.2.1"},
+		{Msg: msgAAAA, Server: "2001:db8::10:53"},
+		{Msg: msgTXT, Server: "NS3.EXAMPLE.ORG:53"},
+	})
+	if err != nil {
+		t.Fatalf("NewNetwork: %v", err)
+	}
+	t.Cleanup(network.Close)
+
+	if srv := network.remotes["192.0.2.1:53"]; srv == nil {
+		t.Fatalf("missing IPv4 remote")
+	}
+	if srv := network.remotes["ns3.example.org:53"]; srv == nil {
+		t.Fatalf("missing TXT remote")
+	}
+	base, ok := network.aliases["[2001:db8::10]:53"]
+	if !ok {
+		t.Fatalf("missing ipv6 alias mapping")
+	}
+	if base == "" || network.remotes[base] == nil {
+		t.Fatalf("alias %q not bound to a remote", base)
+	}
+	if got := network.nameToRemotes["ns1.example.org"]; len(got) != 1 || got[0] != "192.0.2.1:53" {
+		t.Fatalf("unexpected ns1 remotes: %#v", got)
+	}
+	if got := network.nameToRemotes["ns2.example.org"]; len(got) != 1 || got[0] != "[2001:db8::10:53]:53" {
+		t.Fatalf("unexpected ns2 remotes: %#v", got)
+	}
+}
+
+func networkTestMessages(t *testing.T) (msgA, msgAAAA, msgTXT *dns.Msg) {
+	t.Helper()
+
+	rrA := mustRR(t, "example.org. 300 IN A 192.0.2.5")
+	rrNS := mustRR(t, "example.org. 300 IN NS ns1.example.org.")
+	rrGlue := mustRR(t, "ns1.example.org. 300 IN A 192.0.2.1")
+
+	msgA = &dns.Msg{}
+	msgA.Id = 1234
+	msgA.Response = true
+	msgA.Authoritative = true
+	msgA.RecursionAvailable = true
+	msgA.Question = []dns.Question{{
+		Name:   dns.Fqdn("example.org"),
+		Qtype:  dns.TypeA,
+		Qclass: dns.ClassINET,
+	}}
+	msgA.Answer = []dns.RR{rrA}
+	msgA.Ns = []dns.RR{rrNS}
+	msgA.Extra = []dns.RR{rrGlue}
+
+	rrAAAA := mustRR(t, "ipv6.example. 300 IN AAAA 2001:db8::feed")
+	rrGlueV6 := mustRR(t, "ns2.example.org. 300 IN AAAA 2001:db8::10")
+
+	msgAAAA = &dns.Msg{}
+	msgAAAA.Id = 4321
+	msgAAAA.Response = true
+	msgAAAA.Authoritative = true
+	msgAAAA.Question = []dns.Question{{
+		Name:   dns.Fqdn("ipv6.example"),
+		Qtype:  dns.TypeAAAA,
+		Qclass: dns.ClassINET,
+	}}
+	msgAAAA.Answer = []dns.RR{rrAAAA}
+	msgAAAA.Extra = []dns.RR{rrGlueV6}
+
+	rrTXT := mustRR(t, "service.example. 60 IN TXT \"ok\"")
+
+	msgTXT = &dns.Msg{}
+	msgTXT.Id = 9999
+	msgTXT.Response = true
+	msgTXT.Authoritative = true
+	msgTXT.Question = []dns.Question{{
+		Name:   dns.Fqdn("service.example"),
+		Qtype:  dns.TypeTXT,
+		Qclass: dns.ClassINET,
+	}}
+	msgTXT.Answer = []dns.RR{rrTXT}
+
+	return msgA, msgAAAA, msgTXT
 }
 
 func mustRR(t *testing.T, s string) dns.RR {
