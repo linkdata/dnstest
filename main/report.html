@@ -59,7 +59,7 @@
 				
 				<option value="file1">github.com/linkdata/dnstest/key.go (100.0%)</option>
 				
-				<option value="file2">github.com/linkdata/dnstest/network.go (78.9%)</option>
+				<option value="file2">github.com/linkdata/dnstest/network.go (80.8%)</option>
 				
 				<option value="file3">github.com/linkdata/dnstest/parsedigoutput.go (98.5%)</option>
 				
@@ -195,7 +195,7 @@ func NewNetwork(exchs []Exchange) (nw *Network, err error) <span class="cov8" ti
                 }
 
                 <span class="cov8" title="1">remoteAddr, err := normalizeServerAddress(exch.Server)
-                if err != nil </span><span class="cov0" title="0">{
+                if err != nil </span><span class="cov8" title="1">{
                         return nil, err
                 }</span>
                 <span class="cov8" title="1">alias := deriveAlias(exch.Server)
@@ -206,12 +206,18 @@ func NewNetwork(exchs []Exchange) (nw *Network, err error) <span class="cov8" ti
                 <span class="cov8" title="1">if _, ok := remoteResponses[remoteAddr]; !ok </span><span class="cov8" title="1">{
                         remoteResponses[remoteAddr] = make(map[Key]*Response)
                 }</span>
-                <span class="cov8" title="1">msgCopy := exch.Msg.Copy()
+                <span class="cov8" title="1">errText := strings.TrimSpace(exch.Error)
                 for _, q := range exch.Question </span><span class="cov8" title="1">{
-                        resp := &amp;Response{Msg: msgCopy}
-                        if msgCopy.Rcode != dns.RcodeSuccess </span><span class="cov8" title="1">{
-                                resp.Rcode = msgCopy.Rcode
-                        }</span>
+                        resp := &amp;Response{}
+                        if errText != "" </span><span class="cov8" title="1">{
+                                resp.Drop = true
+                        }</span> else<span class="cov8" title="1"> {
+                                msgCopy := exch.Msg.Copy()
+                                resp.Msg = msgCopy
+                                if msgCopy.Rcode != dns.RcodeSuccess </span><span class="cov8" title="1">{
+                                        resp.Rcode = msgCopy.Rcode
+                                }</span>
+                        }
                         <span class="cov8" title="1">remoteResponses[remoteAddr][NewKey(q.Name, q.Qtype)] = resp</span>
                 }
 
@@ -379,7 +385,7 @@ func deriveAlias(server string) string <span class="cov8" title="1">{
 
 func normalizeServerAddress(addr string) (string, error) <span class="cov8" title="1">{
         addr = strings.TrimSpace(addr)
-        if addr == "" </span><span class="cov0" title="0">{
+        if addr == "" </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("dnstest: empty address")
         }</span>
 
