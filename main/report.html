@@ -59,7 +59,7 @@
 				
 				<option value="file1">github.com/linkdata/dnstest/key.go (100.0%)</option>
 				
-				<option value="file2">github.com/linkdata/dnstest/network.go (78.8%)</option>
+				<option value="file2">github.com/linkdata/dnstest/network.go (79.2%)</option>
 				
 				<option value="file3">github.com/linkdata/dnstest/parsedigoutput.go (98.5%)</option>
 				
@@ -208,8 +208,12 @@ func NewNetwork(exchs []Exchange) (nw *Network, err error) <span class="cov8" ti
                 }</span>
                 <span class="cov8" title="1">msgCopy := exch.Msg.Copy()
                 for _, q := range exch.Question </span><span class="cov8" title="1">{
-                        remoteResponses[remoteAddr][NewKey(q.Name, q.Qtype)] = &amp;Response{Msg: msgCopy}
-                }</span>
+                        resp := &amp;Response{Msg: msgCopy}
+                        if msgCopy.Rcode != dns.RcodeSuccess </span><span class="cov8" title="1">{
+                                resp.Rcode = msgCopy.Rcode
+                        }</span>
+                        <span class="cov8" title="1">remoteResponses[remoteAddr][NewKey(q.Name, q.Qtype)] = resp</span>
+                }
 
                 <span class="cov8" title="1">host, _, _ := net.SplitHostPort(remoteAddr)
                 ipHost := host
