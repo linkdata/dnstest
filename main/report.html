@@ -59,7 +59,7 @@
 				
 				<option value="file1">github.com/linkdata/dnstest/key.go (100.0%)</option>
 				
-				<option value="file2">github.com/linkdata/dnstest/network.go (79.2%)</option>
+				<option value="file2">github.com/linkdata/dnstest/network.go (78.9%)</option>
 				
 				<option value="file3">github.com/linkdata/dnstest/parsedigoutput.go (98.5%)</option>
 				
@@ -425,8 +425,12 @@ func normalizeHost(host string) string <span class="cov8" title="1">{
 }
 
 func normalizeDomain(host string) string <span class="cov8" title="1">{
-        return strings.TrimSuffix(strings.ToLower(strings.TrimSpace(host)), ".")
-}</span>
+        host = strings.TrimSpace(host)
+        if host == "" </span><span class="cov0" title="0">{
+                return ""
+        }</span>
+        <span class="cov8" title="1">return strings.TrimSuffix(dns.CanonicalName(host), ".")</span>
+}
 
 func canonicalIP(host string) string <span class="cov8" title="1">{
         h := strings.Trim(host, "[]")
