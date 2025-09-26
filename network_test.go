@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"testing"
@@ -427,6 +429,96 @@ func assertAAAARecord(t *testing.T, msg *dns.Msg, want string) {
 	}
 	if got := aaa.AAAA.String(); got != want {
 		t.Fatalf("AAAA answer: got %s, want %s", got, want)
+	}
+}
+
+func TestNetworkFromRecursiveTestData(t *testing.T) {
+	t.Parallel()
+	exerciseNetworksFromDir(t, "testdata/recursive")
+}
+
+func TestNetworkFromDigTestData(t *testing.T) {
+	t.Parallel()
+	exerciseNetworksFromDir(t, "testdata/dig")
+}
+
+func exerciseNetworksFromDir(t *testing.T, dir string) {
+	t.Helper()
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatalf("ReadDir(%q): %v", dir, err)
+	}
+	var files []os.DirEntry
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".txt") {
+			continue
+		}
+		files = append(files, entry)
+	}
+	if len(files) == 0 {
+		t.Fatalf("no transcripts found in %s", dir)
+	}
+	sort.Slice(files, func(i, j int) bool { return files[i].Name() < files[j].Name() })
+	for _, entry := range files {
+		name := entry.Name()
+		path := filepath.Join(dir, name)
+		t.Run(strings.TrimSuffix(name, ".txt"), func(t *testing.T) {
+			f, err := os.Open(path)
+			if err != nil {
+				t.Fatalf("Open(%q): %v", path, err)
+			}
+			defer f.Close()
+
+			exchs, err := ParseDigOutput(f)
+			if err != nil {
+				t.Fatalf("ParseDigOutput(%q): %v", path, err)
+			}
+			var filtered []Exchange
+			for _, exch := range exchs {
+				if strings.TrimSpace(exch.Server) == "" || exch.Msg == nil {
+					continue
+				}
+				filtered = append(filtered, exch)
+			}
+			if len(filtered) == 0 {
+				t.Fatalf("no usable exchanges parsed from %s", path)
+			}
+
+			network, err := NewNetwork(filtered)
+			if err != nil {
+				t.Fatalf("NewNetwork(%q): %v", path, err)
+			}
+			t.Cleanup(network.Close)
+
+			lastIdx := -1
+			for i := len(filtered) - 1; i >= 0; i-- {
+				ex := filtered[i]
+				if ex.Msg == nil || len(ex.Question) == 0 || strings.TrimSpace(ex.Server) == "" {
+					continue
+				}
+				lastIdx = i
+				break
+			}
+			if lastIdx == -1 {
+				t.Fatalf("no usable exchanges in %s", path)
+			}
+
+			exch := filtered[lastIdx]
+			addr, err := normalizeServerAddress(exch.Server)
+			if err != nil {
+				t.Fatalf("normalizeServerAddress(%q): %v", exch.Server, err)
+			}
+
+			resp := queryNetworkForExchange(t, network, addr, exch)
+			if diff := compareDNSMessages(exch.Msg, resp); diff != "" {
+				q := exch.Question[0]
+				qtype := dns.TypeToString[q.Qtype]
+				if qtype == "" {
+					qtype = fmt.Sprintf("TYPE%d", q.Qtype)
+				}
+				t.Fatalf("%s final exchange mismatch for %s %s: %s", path, q.Name, qtype, diff)
+			}
+		})
 	}
 }
 
